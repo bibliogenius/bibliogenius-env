@@ -46,7 +46,7 @@ This is the **environment repo** that orchestrates all BiblioGenius components. 
 
 ### For Users
 
-Get the app from [bibliogenius.org](https://bibliogenius.org) or your favorite app store (App Store, Google Play) — available on iOS, Android, macOS, Windows, and Linux.
+Get the app from [bibliogenius.org](https://bibliogenius.org) or your favorite app store after 1.0 release (coming soon) — available on iOS, Android, macOS, Windows, and Linux.
 
 ### For Developers
 
