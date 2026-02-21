@@ -168,11 +168,12 @@ def setup_llm_config(profile, root_dir):
     """Set up Claude Code and Cursor configuration for the profile."""
     header(f"3/4 — Configuration IA ({profile})")
 
-    # ── Claude Code: settings.local.json for no-code guard ──
+    # ── Claude Code: settings.local.json — manage no-code guard ──
+    settings_local = root_dir / ".claude" / "settings.local.json"
+
     if profile == "no-code":
-        settings_local = root_dir / ".claude" / "settings.local.json"
         if settings_local.exists():
-            warn("settings.local.json existe deja — pas de modification")
+            warn("settings.local.json exists — not modified")
         else:
             guard_config = {
                 "hooks": {
@@ -194,7 +195,12 @@ def setup_llm_config(profile, root_dir):
             settings_local.write_text(
                 json.dumps(guard_config, indent=2, ensure_ascii=False) + "\n"
             )
-            success("Hook de protection no-code active (settings.local.json)")
+            success("No-code guard hook activated (settings.local.json)")
+    else:
+        # Remove no-code guard when switching to junior/senior
+        if settings_local.exists():
+            settings_local.unlink()
+            success("No-code guard hook removed (settings.local.json deleted)")
 
     # ── Check that .claude/ config exists ──
     claude_dir = root_dir / ".claude"

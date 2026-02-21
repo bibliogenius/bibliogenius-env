@@ -15,7 +15,7 @@ help:
 	@echo "$(YELLOW)Available commands:$(RESET)"
 	@echo ""
 	@echo "$(CYAN)📦 Installation & Setup:$(RESET)"
-	@echo "  $(GREEN)make setup P=<profile>$(RESET): Setup environment (no-code / junior / senior)"
+	@echo "  $(GREEN)make setup P=<profile>$(RESET): Setup or switch profile (no-code / junior / senior)"
 	@echo "  $(GREEN)make install-all$(RESET)    : Install dependencies for all components"
 	@echo "  $(GREEN)make install-hub$(RESET)    : Install Composer dependencies for Symfony Hub"
 	@echo "  $(GREEN)make install-bundle$(RESET) : Install Composer dependencies for Symfony Bundle"
@@ -46,15 +46,16 @@ help:
 	@echo ""
 
 # =============================================================================
-# ONBOARDING
+# ONBOARDING & PROFILE SWITCHING
 # =============================================================================
-# Usage: make setup P=no-code
-#        make setup P=junior
-#        make setup P=senior
+# Usage: make setup P=no-code    (initial setup or switch to no-code)
+#        make setup P=junior     (initial setup or switch to junior)
+#        make setup P=senior     (initial setup or switch to senior)
+# Re-running with a different profile clones missing repos and adjusts hooks.
 setup:
 ifndef P
 	@echo "$(YELLOW)Usage: make setup P=<profile>$(RESET)"
-	@echo "  Profils : no-code, junior, senior"
+	@echo "  Profiles: no-code, junior, senior"
 	@exit 1
 endif
 	@python3 setup.py $(P)

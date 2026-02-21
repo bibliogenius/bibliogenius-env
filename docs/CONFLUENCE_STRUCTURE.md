@@ -1,178 +1,178 @@
-# Structure Confluence recommandee — BiblioGenius
+# Recommended Confluence Structure — BiblioGenius
 
-> Ce document propose une reorganisation de l'espace Confluence pour le rendre
-> lisible par un Product Owner non-technique. L'objectif : 4 espaces clairs
-> + 1 archive pour le contenu dev-only.
+> This document proposes a Confluence reorganization to make it
+> readable by non-technical contributors. The goal: 4 clear spaces
+> + 1 archive for dev-only content.
 
 ---
 
-## Vue d'ensemble
+## Overview
 
 ```
-Accueil
-  └── Dashboard contributeur (liens rapides vers les 4 espaces)
+Home
+  └── Contributor Dashboard (quick links to the 4 spaces)
 
-1. Produit          — vision, fonctionnalites, architecture haut niveau
-2. Qualite          — tests fonctionnels, bug reports, guides beta
-3. Business         — strategie, concurrence, partenariats, financement
-4. Contribuer       — guide no-code pour faire de petites modifications au code
+1. Product        — vision, features, high-level architecture
+2. Quality        — functional tests, bug reports, beta guides
+3. Business       — strategy, competition, partnerships, funding
+4. Contribute     — no-code guide for small code changes
 
-Archive (masque par defaut)
-  └── Contenu technique ou obsolete
+Archive (hidden by default)
+  └── Technical or obsolete content
 ```
 
 ---
 
-## Espace 1 — Produit
+## Space 1 — Product
 
-| Page | Source actuelle | Notes |
-|------|-----------------|-------|
-| Vision & Roadmap | `ROADMAP_V4.md` | Roadmap actuelle, planning par phase |
-| Matrice des fonctionnalites | `features.md` | Liste complete des features par module |
-| Architecture (vue haut niveau) | Schema mermaid du `README.md` | Diagramme simple : Flutter + Rust + SQLite |
-| Modules disponibles | Sections de `features.md` | Scan, gamification, P2P, MCP, etc. |
-| UX & Maquettes | Captures d'ecran de l'app | A creer : flux utilisateur principaux |
-| Milestones | `project_milestones.md` | Jalons du projet |
-| Strategie modulaire | `MODULAR_STRATEGY.md` | Comment les modules s'articulent |
-
----
-
-## Espace 2 — Qualite
-
-| Page | Source actuelle | Notes |
-|------|-----------------|-------|
-| Tests fonctionnels | `QA_NON_REGRESSION.md` (Part A uniquement) | Checklist fonctionnelle par priorite |
-| Guide de test beta | `PRE_ALPHA_TEST_GUIDE.md` | Instructions pour les beta testeurs |
-| Tests reseau & contacts | `QA_NETWORK_CONTACTS.md` | Scenarios P2P specifiques |
-| Bug reports | `qa/bug_report.md` | Template + processus |
-| Troubleshooting | `qa/deployment_troubleshooting.md` | Problemes connus et solutions |
-
-> **Note** : `QA_NON_REGRESSION.md` Part B (scenarios detailles, securite,
-> performance) reste dans l'Archive — trop technique pour les contributeurs no-code.
+| Page | Current source | Notes |
+|------|---------------|-------|
+| Vision & Roadmap | `ROADMAP_V4.md` | Current roadmap, phase planning |
+| Feature matrix | `features.md` | Complete feature list by module |
+| Architecture (high level) | Mermaid diagram from `README.md` | Simple diagram: Flutter + Rust + SQLite |
+| Available modules | Sections of `features.md` | Scan, gamification, P2P, MCP, etc. |
+| UX & Mockups | App screenshots | To create: main user flows |
+| Milestones | `project_milestones.md` | Project milestones |
+| Modular strategy | `MODULAR_STRATEGY.md` | How modules fit together |
 
 ---
 
-## Espace 3 — Business & Strategie
+## Space 2 — Quality
 
-| Page | Source actuelle | Notes |
-|------|-----------------|-------|
-| Analyse concurrentielle | `COMPETITIVE_ANALYSIS.md` | Positionnement vs Gleeph, Babelio, etc. |
-| Strategie Gleeph | `gleeph_conversion_strategy.md` | Plan de conversion utilisateurs |
-| Profils d'installation | `INSTALLATION_PROFILE_ANALYSIS.md` | Segmentation utilisateurs |
-| Pitch & funding | `PITCH_STRATEGY.md` | Arguments de vente |
-| Financement | `funding/financialRoadmap.md` | Budget, subventions, NLnet |
-| Opportunites | `funding/funding_opportunities.md` | Sources de financement |
-| Plan strategique | `strategic_roadmap.md` | Vision long terme |
-| Partenariats | `partnerships/` | Inventaire, ENSSIB, Koha |
-| Strategy ENSSIB | `ENSSIB_STRATEGY_AND_ACTION_PLAN.md` | Plan d'action ENSSIB |
-| BSF Synergies | `BSF_SYNERGY_AND_OPPORTUNITIES.md` | Opportunites BSF |
-| Marketing | `marketing/` | Outreach, annonces, flyer |
-| Evenements | `events/` | FOSDEM, API Days |
-| Appels d'offres | `tenders/` | Reponses aux AO |
-| Building in Public | `building_in_public.md` | Strategie de communication |
-| Experimentation locale | `local_experimentation_strategy.md` | Tests terrain |
+| Page | Current source | Notes |
+|------|---------------|-------|
+| Functional tests | `QA_NON_REGRESSION.md` (Part A only) | Functional checklist by priority |
+| Beta test guide | `PRE_ALPHA_TEST_GUIDE.md` | Instructions for beta testers |
+| Network & contacts tests | `QA_NETWORK_CONTACTS.md` | P2P-specific scenarios |
+| Bug reports | `qa/bug_report.md` | Template + process |
+| Troubleshooting | `qa/deployment_troubleshooting.md` | Known issues and solutions |
+
+> **Note**: `QA_NON_REGRESSION.md` Part B (detailed scenarios, security,
+> performance) stays in Archive — too technical for no-code contributors.
 
 ---
 
-## Espace 4 — Contribuer au code (guide no-code)
+## Space 3 — Business & Strategy
 
-| Page | Source actuelle | Notes |
-|------|-----------------|-------|
-| Premiers pas | Nouveau (voir `NO_CODE_ONBOARDING.md`) | Setup dev simplifie |
-| Zones sures | Nouveau | Traductions, listes curees, themes |
-| Workflow PR | Nouveau | Branche → modif → review → merge |
-| Commandes IA | Nouveau | `/onboard no-code`, `/po-check`, `/review` |
-| Premiers tickets | `good-first-issues/` | Sujets accessibles pour contribuer |
-| Guide de contribution | `CONTRIBUTING.md` | Process general |
+| Page | Current source | Notes |
+|------|---------------|-------|
+| Competitive analysis | `COMPETITIVE_ANALYSIS.md` | Positioning vs Gleeph, Babelio, etc. |
+| Gleeph strategy | `gleeph_conversion_strategy.md` | User conversion plan |
+| Installation profiles | `INSTALLATION_PROFILE_ANALYSIS.md` | User segmentation |
+| Pitch & funding | `PITCH_STRATEGY.md` | Sales arguments |
+| Funding | `funding/financialRoadmap.md` | Budget, grants, NLnet |
+| Opportunities | `funding/funding_opportunities.md` | Funding sources |
+| Strategic plan | `strategic_roadmap.md` | Long-term vision |
+| Partnerships | `partnerships/` | Inventaire, ENSSIB, Koha |
+| ENSSIB strategy | `ENSSIB_STRATEGY_AND_ACTION_PLAN.md` | ENSSIB action plan |
+| BSF Synergies | `BSF_SYNERGY_AND_OPPORTUNITIES.md` | BSF opportunities |
+| Marketing | `marketing/` | Outreach, announcements, flyer |
+| Events | `events/` | FOSDEM, API Days |
+| Tenders | `tenders/` | Tender responses |
+| Building in Public | `building_in_public.md` | Communication strategy |
+| Local experimentation | `local_experimentation_strategy.md` | Field tests |
 
 ---
 
-## Archive (masque par defaut)
+## Space 4 — Contribute (no-code guide)
 
-> Ces documents restent dans le repo pour les developpeurs, mais sont masques
-> dans la vue Confluence des contributeurs no-code.
+| Page | Current source | Notes |
+|------|---------------|-------|
+| Getting started | See `NO_CODE_ONBOARDING.md` | Simplified dev setup |
+| Safe zones | New | Translations, curated lists, themes |
+| PR workflow | New | Branch, modify, review, merge |
+| AI commands | New | `/onboard no-code`, `/contrib-check`, `/review` |
+| First tickets | `good-first-issues/` | Accessible topics to contribute |
+| Contributing guide | `CONTRIBUTING.md` | General process |
 
-### Documents a archiver
+---
 
-| Document | Raison |
+## Archive (hidden by default)
+
+> These documents remain in the repo for developers, but are hidden
+> from the no-code contributor Confluence view.
+
+### Documents to archive
+
+| Document | Reason |
 |----------|--------|
-| **Securite & Crypto** | |
-| `SECURITY_GUIDELINES.md` (~2,850 lignes) | Crypto pur, audit technique |
-| `ADR-001` a `ADR-004` | Decisions d'architecture E2EE |
-| `security/code_audit_dec_2025.md` | Audit de code interne |
-| **Architecture technique** | |
-| `ArchitectureRust.md` | Layers Rust internes |
-| `data-model-book-fields.md` | Schema DB technique |
-| `data_model_evolution_v4.md` | Evolution du modele de donnees |
-| `DEVELOPMENT_SETUP.md` | Remplace par le guide simplifie no-code |
-| `DOCKER_SETUP.md` | Infrastructure dev |
-| **Recherche terminee** | |
-| `research/p2p-network/` (6+ fichiers) | Decision prise, iroh → LAN direct |
-| `research/ai-ml/` (4 fichiers) | Explorations techniques |
-| `research/quiz-module/` (3 fichiers) | Module pas encore lance |
-| `research/bookshelf_view.md` | Exploration UI terminee |
-| `research/integrated_module_manager_analysis.md` | Analyse technique |
-| **QA technique** | |
-| `qa/p2p_impact_analysis.md` | Analyse d'impact dev |
-| `qa/qa_report_final.md` | Rapport QA technique |
-| `qa/ipad_testing_guide.md` | Test specifique plateforme |
-| **Deploiement & Ops** | |
-| `ios_deployment.md` | Guide deploiement iOS |
-| `macos_deployment.md` | Guide deploiement macOS |
-| `beta_distribution_guide.md` | Distribution technique |
-| **Roadmaps obsoletes** | |
-| `_archive/ROADMAP_V2.md` | Remplacee par V4 |
-| `_archive/POC_ROADMAP.md` | POC termine |
-| `_archive/POC_COMPLETE.md` | POC termine |
-| `_archive/strategic_roadmap_2025.md` | Remplacee |
-| **Divers technique** | |
-| `CLAUDE.md` (Rust, Flutter) | Instructions dev pour IA |
+| **Security & Crypto** | |
+| `SECURITY_GUIDELINES.md` (~2,850 lines) | Pure crypto, technical audit |
+| `ADR-001` to `ADR-004` | E2EE architecture decisions |
+| `security/code_audit_dec_2025.md` | Internal code audit |
+| **Technical architecture** | |
+| `ArchitectureRust.md` | Internal Rust layers |
+| `data-model-book-fields.md` | Technical DB schema |
+| `data_model_evolution_v4.md` | Data model evolution |
+| `DEVELOPMENT_SETUP.md` | Replaced by simplified no-code guide |
+| `DOCKER_SETUP.md` | Dev infrastructure |
+| **Completed research** | |
+| `research/p2p-network/` (6+ files) | Decision made, iroh to LAN direct |
+| `research/ai-ml/` (4 files) | Technical explorations |
+| `research/quiz-module/` (3 files) | Module not yet launched |
+| `research/bookshelf_view.md` | UI exploration completed |
+| `research/integrated_module_manager_analysis.md` | Technical analysis |
+| **Technical QA** | |
+| `qa/p2p_impact_analysis.md` | Dev impact analysis |
+| `qa/qa_report_final.md` | Technical QA report |
+| `qa/ipad_testing_guide.md` | Platform-specific testing |
+| **Deployment & Ops** | |
+| `ios_deployment.md` | iOS deployment guide |
+| `macos_deployment.md` | macOS deployment guide |
+| `beta_distribution_guide.md` | Technical distribution |
+| **Obsolete roadmaps** | |
+| `_archive/ROADMAP_V2.md` | Replaced by V4 |
+| `_archive/POC_ROADMAP.md` | POC completed |
+| `_archive/POC_COMPLETE.md` | POC completed |
+| `_archive/strategic_roadmap_2025.md` | Replaced |
+| **Technical misc** | |
+| `CLAUDE.md` (Rust, Flutter) | AI dev instructions |
 | `testing_poc.md` | POC tests |
-| `inventaire_integration_roadmap.md` | Roadmap technique integration |
-| `feature-profile-upload.md`, `feature-bookseller-profile.md` | Specs techniques |
-| `video_tutorials.md` | Contenu technique |
-| `p2p/` (4 fichiers) | Architecture P2P interne |
-| `tasks/multi_author_support.md` | Tache technique |
-| `modules/mcp/implementation_plan.md` | Plan technique MCP |
-| `technical_feasibility_assessment.md` | Analyse technique |
-| `gamification_v3_implementation.md` | Implementation technique |
+| `inventaire_integration_roadmap.md` | Technical integration roadmap |
+| `feature-profile-upload.md`, `feature-bookseller-profile.md` | Technical specs |
+| `video_tutorials.md` | Technical content |
+| `p2p/` (4 files) | Internal P2P architecture |
+| `tasks/multi_author_support.md` | Technical task |
+| `modules/mcp/implementation_plan.md` | Technical MCP plan |
+| `technical_feasibility_assessment.md` | Technical analysis |
+| `gamification_v3_implementation.md` | Technical implementation |
 
 ---
 
-## Actions recommandees
+## Recommended actions
 
-### Etape 1 — Creer les espaces Confluence
+### Step 1 — Create Confluence spaces
 
-1. Creer les 4 espaces principaux (Produit, Qualite, Business, Contribuer)
-2. Creer l'espace Archive (masque de la navigation par defaut)
-3. Creer la page d'accueil Dashboard avec les liens vers chaque espace
+1. Create the 4 main spaces (Product, Quality, Business, Contribute)
+2. Create the Archive space (hidden from navigation by default)
+3. Create the Dashboard home page with links to each space
 
-### Etape 2 — Migrer le contenu existant
+### Step 2 — Migrate existing content
 
-1. Copier les documents "garder" dans les espaces correspondants
-2. Deplacer les documents "archiver" dans l'espace Archive
-3. Adapter les documents au format Confluence (table des matieres, liens internes)
+1. Copy "keep" documents into corresponding spaces
+2. Move "archive" documents into the Archive space
+3. Adapt documents to Confluence format (table of contents, internal links)
 
-### Etape 3 — Creer le contenu manquant
+### Step 3 — Create missing content
 
-1. Page UX & Maquettes (captures d'ecran des ecrans principaux)
-2. Pages de l'espace "Contribuer" (premiers pas, zones sures, workflow PR)
-3. Dashboard avec les metriques cles
+1. UX & Mockups page (screenshots of main screens)
+2. "Contribute" space pages (getting started, safe zones, PR workflow)
+3. Dashboard with key metrics
 
-### Etape 4 — Mettre en place la maintenance
+### Step 4 — Set up maintenance
 
-- Review trimestrielle : verifier que le contenu est a jour
-- Quand un nouveau document technique est cree, decider immediatement s'il va dans un espace visible ou en Archive
-- Tout contributeur peut proposer de "desarchiver" un document s'il en a besoin
+- Quarterly review: check content is up to date
+- When a new technical document is created, immediately decide if it goes in a visible space or Archive
+- Any contributor can propose to "unarchive" a document if needed
 
 ---
 
-## Resume rapide
+## Quick summary
 
-| Espace | Nb de pages estimees | Public cible |
-|--------|---------------------|--------------|
-| Produit | ~7 | Equipe, parties prenantes |
-| Qualite | ~5 | Contributeurs, beta testeurs |
-| Business | ~15 | PO, direction, partenaires |
-| Contribuer | ~6 | Contributeurs no-code |
-| Archive | ~30+ | Developpeurs uniquement |
+| Space | Estimated pages | Target audience |
+|-------|----------------|-----------------|
+| Product | ~7 | Team, stakeholders |
+| Quality | ~5 | Contributors, beta testers |
+| Business | ~15 | PO, management, partners |
+| Contribute | ~6 | No-code contributors |
+| Archive | ~30+ | Developers only |

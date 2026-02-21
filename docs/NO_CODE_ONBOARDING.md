@@ -1,300 +1,304 @@
-# Bienvenue sur BiblioGenius — Guide Contributeur No-Code
+# Welcome to BiblioGenius — No-Code Contributor Guide
 
-## Le projet en 2 minutes
+## The project in 2 minutes
 
-BiblioGenius est une application de gestion de bibliotheque personnelle.
-Elle permet de cataloguer ses livres, les partager avec des contacts,
-et decouvrir de nouveaux titres via des sources ouvertes (BNF, Inventaire, OpenLibrary).
+BiblioGenius is a personal library management app.
+It lets you catalog your books, share them with contacts,
+and discover new titles through open sources (Inventaire, OpenLibrary).
 
-**Stack technique** (pas besoin de tout comprendre) :
-- **L'interface** (ce que l'utilisateur voit) : Flutter (langage Dart)
-- **Le moteur** (la logique metier) : Rust
-- **La base de donnees** : SQLite (un fichier local)
-- L'interface appelle directement le moteur via FFI (pas de serveur web entre les deux)
+**Technical stack** (no need to understand it all):
+- **The interface** (what the user sees): Flutter (Dart language)
+- **The engine** (business logic): Rust
+- **The database**: SQLite (a local file)
+- The interface calls the engine directly via FFI (Foreign Function Interface — a bridge that lets Flutter talk to Rust without going through a web server)
 
-**Version actuelle** : v0.7.x (pre-alpha)
+**Current version**: v0.7.x (pre-alpha)
 
-**Ce qui marche deja** : scan de livres (ISBN, couverture), catalogue personnel,
-recherche multi-sources, gamification, echanges entre contacts en reseau local,
-chiffrement de bout en bout (E2EE).
-
----
-
-## Ta boite a outils
-
-| Outil | Usage | Lien |
-|-------|-------|------|
-| **Confluence** | Documentation produit, QA, business | *(lien a remplir)* |
-| **GitHub** | Code source et issues | *(lien a remplir)* |
-| **Claude Code** | Assistant IA pour contribuer au code | Terminal : `claude` |
-| **Cursor** | Editeur de code avec IA integree | Alternative a VS Code |
+**What already works**: book scanning (ISBN, cover), personal catalog,
+multi-source search, gamification, local network exchanges between contacts,
+end-to-end encryption (E2EE).
 
 ---
 
-## Comment t'y retrouver dans Confluence
+## Your toolbox
 
-> Voir `CONFLUENCE_STRUCTURE.md` pour la structure detaillee.
-
-| Espace | Ce que tu y trouves |
-|--------|---------------------|
-| **Produit** | Roadmap, liste des fonctionnalites, architecture haut niveau, modules |
-| **Qualite** | Checklist de tests fonctionnels, guide beta testeurs, bug reports |
-| **Business** | Analyse concurrentielle, pitch, partenariats, financement, marketing |
-| **Contribuer** | Comment faire tes premieres modifications au code (ce guide !) |
-
-L'espace **Archive** contient la documentation technique detaillee (crypto, architecture Rust, recherche P2P...).
-Tu n'en as pas besoin au quotidien — il est masque par defaut.
+| Tool | Usage | Link |
+|------|-------|------|
+| **Confluence** | Product docs, QA, business | *(link TBD)* |
+| **GitHub** | Source code and issues | *(link TBD)* |
+| **Claude Code** | AI assistant for code contributions | Terminal: `claude` |
+| **Cursor** | Code editor with built-in AI | VS Code alternative |
 
 ---
 
-## Tes premieres missions
+## Finding your way in Confluence
 
-Par difficulte croissante :
+> See `CONFLUENCE_STRUCTURE.md` for the detailed structure.
 
-### 1. Corriger une traduction (FR/EN)
+| Space | What you'll find |
+|-------|-----------------|
+| **Product** | Roadmap, feature list, high-level architecture, modules |
+| **Quality** | Functional test checklists, beta tester guide, bug reports |
+| **Business** | Competitive analysis, pitch, partnerships, funding, marketing |
+| **Contribute** | How to make your first code changes (this guide!) |
 
-**Difficulte** : facile
+The **Archive** space contains detailed technical documentation (crypto, Rust architecture, P2P research...).
+You don't need it day-to-day — it's hidden by default.
 
-**Fichiers concernes** : `bibliogenius-app/assets/i18n/*.po`
+---
 
-Les fichiers `.po` contiennent les traductions de l'interface.
-Chaque entree a un `msgid` (la cle) et un `msgstr` (la traduction).
+## Your first missions
 
-Exemple — corriger une faute dans la traduction francaise :
+By increasing difficulty:
+
+### 1. Fix a translation (FR/EN)
+
+**Difficulty**: easy
+
+**Files involved**: `bibliogenius-app/assets/i18n/*.po`
+
+`.po` files contain the interface translations.
+Each entry has a `msgid` (the key) and a `msgstr` (the translation).
+
+Example — fixing a typo in the French translation:
 ```
 msgid "search_placeholder"
 msgstr "Rechercher un livre..."
 ```
 
-**Comment faire** :
-1. Ouvre le fichier `.po` de la langue concernee
-2. Trouve le `msgid` a corriger
-3. Modifie le `msgstr`
-4. Lance `/contrib-check` pour verifier
+**How to do it**:
+1. Open the `.po` file for the relevant language
+2. Find the `msgid` to fix
+3. Edit the `msgstr`
+4. Run `/contrib-check` to verify
 
 ---
 
-### 2. Ajouter une liste curee de livres
+### 2. Add a curated book list
 
-**Difficulte** : facile
+**Difficulty**: easy
 
-**Fichiers concernes** : `bibliogenius-app/assets/curated_lists/**/*.yml`
+**Files involved**: `bibliogenius-app/assets/curated_lists/**/*.yml`
 
-Les listes curees sont des selections thematiques de livres (ex : "Classiques francais",
-"Science-fiction incontournables").
+Curated lists are thematic book selections (e.g., "French Classics",
+"Must-read Sci-Fi").
 
-Exemple de format :
+Example format:
 ```yaml
 - title: "Le Petit Prince"
   author: "Antoine de Saint-Exupery"
   isbn: "9782070612758"
 ```
 
-**Comment faire** :
-1. Cree un nouveau fichier `.yml` dans le bon dossier thematique
-2. Ajoute les livres avec titre, auteur, et ISBN
-3. Lance `/contrib-check` pour verifier la syntaxe
+**How to do it**:
+1. Create a new `.yml` file in the appropriate thematic folder
+2. Add books with title, author, and ISBN
+3. Run `/contrib-check` to verify syntax
 
 ---
 
-### 3. Modifier une couleur du theme
+### 3. Change a theme color
 
-**Difficulte** : moyenne
+**Difficulty**: medium
 
-**Fichiers concernes** : `bibliogenius-app/lib/themes/` ou `lib/theme/app_design.dart`
+**Files involved**: `bibliogenius-app/lib/themes/` or `lib/theme/app_design.dart`
 
-Le theme definit les couleurs, polices et espacements de l'app.
-Tu peux modifier des valeurs numeriques (couleurs en hexadecimal, tailles en pixels).
+The theme defines the app's colors, fonts, and spacing.
+You can modify numeric values (hex colors, pixel sizes).
 
-Exemple :
+Example:
 ```dart
-static const primaryColor = Color(0xFF1A73E8);  // Bleu Google
+static const primaryColor = Color(0xFF1A73E8);  // Google Blue
 ```
 
-**Comment faire** :
-1. Identifie la couleur a changer dans `app_design.dart`
-2. Modifie la valeur hexadecimale
-3. Lance `flutter analyze` pour verifier qu'il n'y a pas d'erreur
+**How to do it**:
+1. Find the color to change in `app_design.dart`
+2. Edit the hex value
+3. Run `flutter analyze` to check for errors
 
 ---
 
-### 4. Mettre a jour le texte d'un ecran simple
+### 4. Update text on a simple screen
 
-**Difficulte** : moyenne
+**Difficulty**: medium
 
-**Fichiers concernes** : `help_screen.dart`, `feedback_screen.dart`, `splash_screen.dart`
+**Files involved**: `help_screen.dart`, `feedback_screen.dart`, `splash_screen.dart`
 
-Ces ecrans contiennent du texte statique que tu peux modifier.
-Attention : le texte doit utiliser le systeme de traduction (pas de texte "en dur").
+These screens contain static text you can modify.
+Important: text must use the translation system (no hardcoded strings).
 
-**Comment faire** :
-1. Ajoute la nouvelle cle de traduction dans les fichiers `.po`
-2. Utilise `TranslationService.translate(context, 'ta_cle')` dans le code Dart
-3. Lance `/contrib-check`
-
----
-
-### 5. Ajouter un widget simple
-
-**Difficulte** : avancee (avec review obligatoire)
-
-**Fichiers concernes** : `bibliogenius-app/lib/widgets/` (fichiers < 300 lignes)
-
-Pour cette mission, travaille avec Claude Code qui te guidera pas a pas.
-La PR sera obligatoirement relue par un developpeur avant d'etre mergee.
+**How to do it**:
+1. Add the new translation key in the `.po` files
+2. Use `TranslationService.translate(context, 'your_key')` in the Dart code
+3. Run `/contrib-check`
 
 ---
 
-## Setup — une seule commande
+### 5. Add a simple widget
 
-### Prerequis
+**Difficulty**: advanced (review required)
 
-Installe ces outils avant de commencer :
+**Files involved**: `bibliogenius-app/lib/widgets/` (files < 300 lines)
 
-| Outil | Installation | Verification |
-|-------|-------------|--------------|
-| **Git** | Mac : `xcode-select --install` / Windows : https://git-scm.com | `git --version` |
+For this mission, work with Claude Code which will guide you step by step.
+The PR will be reviewed by a developer before merging.
+
+---
+
+## Setup — one command
+
+### Prerequisites
+
+Install these tools before starting:
+
+| Tool | Installation | Verification |
+|------|-------------|--------------|
+| **Git** | Mac: `xcode-select --install` / Windows: https://git-scm.com | `git --version` |
 | **Flutter** | https://docs.flutter.dev/get-started/install | `flutter doctor` |
 | **Claude Code** | `npm install -g @anthropic-ai/claude-code` | `claude --version` |
 
 ### Installation
 
 ```bash
-# 1. Clone le repo d'environnement
+# 1. Clone the environment repo
 git clone https://github.com/bibliogenius/bibliogenius-env.git
 cd bibliogenius-env
 
-# 2. Lance le setup (une seule commande !)
+# 2. Run the setup (one command!)
 make setup P=no-code
 ```
 
-C'est tout. Le script va :
-- Verifier tes prerequis (git, flutter)
-- Cloner les repos dont tu as besoin (bibliogenius-app, bibliogenius-docs)
-- Activer le hook de protection qui t'empeche de modifier des fichiers interdits
-- T'afficher les prochaines etapes
+That's it. The script will:
+- Check your prerequisites (git, flutter)
+- Clone the repos you need (bibliogenius-app, bibliogenius-docs)
+- Activate the protection hook that prevents modifying forbidden files
+- Display next steps
 
-> Alternative : `python3 setup.py no-code`
+> Alternative: `python3 setup.py no-code`
 
-### Apres le setup
+> **Switching profile**: If you later need more access (e.g., junior or senior),
+> just re-run `make setup P=junior`. It will clone the missing repos and adjust
+> your AI tool configuration automatically.
+
+### After setup
 
 ```bash
-# 3. Lance Claude Code
+# 3. Launch Claude Code
 claude
 
-# 4. Execute l'onboarding (genere ton fichier .cursorrules)
+# 4. Run the onboarding (generates your .cursorrules file)
 /onboard no-code
 ```
 
-### Lancer l'app (mode debug)
+### Run the app (debug mode)
 
 ```bash
 cd bibliogenius-app
 flutter run
 ```
 
-> Note : le backend Rust est compile automatiquement via FFI.
-> Tu n'as pas besoin d'installer Rust pour les modifications front-end simples.
-> Si `flutter run` echoue sur la compilation Rust, demande de l'aide a un developpeur.
+> Note: the Rust backend compiles automatically via FFI.
+> You don't need to install Rust for simple front-end changes.
+> If `flutter run` fails on Rust compilation, ask a developer for help.
 
 ---
 
-## Workflow pour tes PRs
+## PR workflow
 
-### Etape par etape
+### Step by step
 
 ```
-1. Creer une branche
-   git checkout -b contrib/ma-modification
+1. Create a branch
+   git checkout -b contrib/my-change
 
-2. Faire la modification
-   - Avec Claude Code : decris ce que tu veux changer
-   - Avec Cursor : edite directement le fichier
+2. Make the change
+   - With Claude Code: describe what you want to change
+   - With Cursor: edit the file directly
 
-3. Verifier
+3. Verify
    /contrib-check
 
-4. Sauvegarder localement
-   git add <fichiers-modifies>
-   git commit -m "contrib: description courte de la modif"
+4. Save locally
+   git add <modified-files>
+   git commit -m "contrib: short description of the change"
 
-5. Envoyer sur GitHub
-   git push -u origin contrib/ma-modification
+5. Push to GitHub
+   git push -u origin contrib/my-change
 
-6. Creer la Pull Request
-   - Va sur GitHub, clique "Compare & pull request"
-   - Decris ce que tu as change et pourquoi
-   - Attends la review d'un developpeur
+6. Create the Pull Request
+   - Go to GitHub, click "Compare & pull request"
+   - Describe what you changed and why
+   - Wait for a developer review
 
-7. Apres la review
-   - Si des corrections sont demandees : fais-les sur la meme branche
-   - Quand c'est approuve : le developpeur mergera pour toi
+7. After the review
+   - If changes are requested: make them on the same branch
+   - When approved: the developer will merge for you
 ```
 
-### Convention de nommage
+### Naming conventions
 
-- Branches : `contrib/description-courte` (ex : `contrib/fix-traduction-accueil`)
-- Commits : `contrib: description courte` (ex : `contrib: corriger typo ecran d'aide`)
-- PR title : en francais, descriptif (ex : "Correction traduction ecran d'accueil")
+- Branches: `contrib/short-description` (e.g., `contrib/fix-homepage-translation`)
+- Commits: `contrib: short description` (e.g., `contrib: fix help screen typo`)
+- PR title: descriptive (e.g., "Fix homepage translation")
 
-### Checklist avant de proposer ta PR
+### Checklist before submitting your PR
 
-- [ ] `/contrib-check` retourne OK (pas d'erreur)
-- [ ] Seuls des fichiers "zone sure" sont modifies
-- [ ] J'ai teste l'app localement (`flutter run`) et ca marche
-- [ ] Ma description de PR explique ce que j'ai change et pourquoi
+- [ ] `/contrib-check` returns OK (no errors)
+- [ ] Only "safe zone" files are modified
+- [ ] I tested the app locally (`flutter run`) and it works
+- [ ] My PR description explains what I changed and why
 
 ---
 
-## Zones sures vs zones interdites
+## Safe zones vs forbidden zones
 
-### Tu PEUX modifier
+### You CAN modify
 
-| Zone | Chemin | Exemples |
-|------|--------|----------|
-| Traductions | `assets/i18n/*.po` | Corriger une traduction, ajouter une langue |
-| Listes curees | `assets/curated_lists/**/*.yml` | Ajouter une selection de livres |
-| Themes | `lib/themes/` | Changer une couleur, un espacement |
-| Design tokens | `lib/theme/app_design.dart` | Valeurs numeriques et couleurs uniquement |
-| Ecrans simples | `help_screen.dart`, `feedback_screen.dart`, `splash_screen.dart` | Texte, mise en page basique |
-| Widgets simples | `lib/widgets/` (< 300 lignes) | Avec guidage Claude Code |
-| Images | `assets/images/` | Remplacer un logo, une illustration |
+| Zone | Path | Examples |
+|------|------|----------|
+| Translations | `assets/i18n/*.po` | Fix a translation, add a language |
+| Curated lists | `assets/curated_lists/**/*.yml` | Add a book selection |
+| Themes | `lib/themes/` | Change a color, spacing |
+| Design tokens | `lib/theme/app_design.dart` | Numeric values and colors only |
+| Simple screens | `help_screen.dart`, `feedback_screen.dart`, `splash_screen.dart` | Text, basic layout |
+| Simple widgets | `lib/widgets/` (< 300 lines) | With Claude Code guidance |
+| Images | `assets/images/` | Replace a logo, illustration |
 
-### Tu ne DOIS PAS modifier
+### You MUST NOT modify
 
-| Zone | Raison |
+| Zone | Reason |
 |------|--------|
-| Tout le Rust (`bibliogenius/`) | Backend technique, risque de casser le moteur |
-| `lib/models/` | Contrat d'interface avec le Rust |
-| `lib/services/` | Logique metier Flutter |
-| `lib/providers/` | Gestion d'etat |
-| `lib/data/` | Acces aux donnees |
-| `lib/src/rust/` | Code genere automatiquement (FFI) |
-| `lib/config/`, `lib/utils/` | Configuration interne |
-| `pubspec.yaml`, `Cargo.toml` | Dependances du projet |
-| Fichiers CI, migrations | Infrastructure |
-| `.claude/hooks/` | Gardes de securite |
+| All Rust code (`bibliogenius/`) | Technical backend, risk of breaking the engine |
+| `lib/models/` | Interface contract with Rust |
+| `lib/services/` | Flutter business logic |
+| `lib/providers/` | State management |
+| `lib/data/` | Data access |
+| `lib/src/rust/` | Auto-generated code (FFI) |
+| `lib/config/`, `lib/utils/` | Internal configuration |
+| `pubspec.yaml`, `Cargo.toml` | Project dependencies |
+| CI files, migrations | Infrastructure |
+| `.claude/hooks/` | Security guards |
 
-> Si le hook no-code est actif, Claude Code refusera automatiquement
-> toute modification hors zone sure.
+> If the no-code hook is active, Claude Code will automatically refuse
+> any modification outside safe zones.
 
 ---
 
-## Glossaire rapide
+## Quick glossary
 
-| Terme | Explication simple |
-|-------|-------------------|
-| **Flutter** | Framework pour creer l'interface (les ecrans, boutons, etc.) |
-| **Dart** | Langage de programmation utilise par Flutter |
-| **Rust** | Langage de programmation du moteur (backend) |
-| **FFI** | Pont entre Flutter et Rust (ils se "parlent" directement) |
-| **PR (Pull Request)** | Demande pour integrer tes modifications dans le code principal |
-| **Branch (branche)** | Copie de travail isolee du code (pour ne pas casser le principal) |
-| **Merge** | Integrer une branche dans le code principal |
-| **Review** | Relecture de ton code par un developpeur avant le merge |
-| **`.po`** | Format de fichier standard pour les traductions |
-| **`.yml`** | Format de fichier structure (listes, configurations) |
-| **`flutter analyze`** | Outil qui verifie les erreurs dans le code Flutter |
-| **Hook** | Script automatique qui se declenche a certaines actions |
-| **E2EE** | Chiffrement de bout en bout (securite des echanges entre utilisateurs) |
-| **SeaORM** | Outil Rust pour acceder a la base de donnees (tu n'y touches pas) |
+| Term | Simple explanation |
+|------|-------------------|
+| **Flutter** | Framework for building the interface (screens, buttons, etc.) |
+| **Dart** | Programming language used by Flutter |
+| **Rust** | Programming language for the engine (backend) |
+| **FFI** | Bridge between Flutter and Rust (they "talk" directly) |
+| **PR (Pull Request)** | Request to integrate your changes into the main code |
+| **Branch** | Isolated working copy of the code (so you don't break the main one) |
+| **Merge** | Integrate a branch into the main code |
+| **Review** | Code review by a developer before merging |
+| **`.po`** | Standard file format for translations |
+| **`.yml`** | Structured file format (lists, configurations) |
+| **`flutter analyze`** | Tool that checks for errors in Flutter code |
+| **Hook** | Automatic script triggered by certain actions |
+| **E2EE** | End-to-end encryption (security for exchanges between users) |
+| **SeaORM** | Rust tool for database access (you don't touch this) |

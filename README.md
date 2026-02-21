@@ -46,10 +46,7 @@ This is the **environment repo** that orchestrates all BiblioGenius components. 
 
 ### For Users
 
-Download the BiblioGenius app for your platform:
-<https://github.com/bibliogenius/bibliogenius-app/releases>
-
-The Rust backend is **embedded in the app** — no separate server installation needed!
+Get the app from [bibliogenius.org](https://bibliogenius.org) or your favorite app store (App Store, Google Play) — available on iOS, Android, macOS, Windows, and Linux.
 
 ### For Developers
 
@@ -61,10 +58,13 @@ cd bibliogenius-env
 # Setup for your profile (no-code / junior / senior)
 make setup P=junior
 
+# To switch profile later, just re-run with the new profile:
+make setup P=senior
+
 # Then follow the on-screen instructions
 ```
 
-> **Note**: The setup script clones the right repos, configures your AI tools (Claude Code / Cursor), and guides you through the next steps.
+> **Note**: The setup script clones the right repos, configures your AI tools (Claude Code / Cursor), and guides you through the next steps. Re-running with a different profile upgrades your environment (clones missing repos, adjusts hooks).
 >
 > Alternative: `python3 setup.py junior`
 
@@ -97,7 +97,7 @@ Each component has its own repository. Please contribute to the appropriate repo
 
 ## 📄 License
 
-MIT License - see LICENSE file in each repository
+AGPL-3.0-or-later - see LICENSE file in each repository
 
 ## 👤 Author
 
