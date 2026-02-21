@@ -186,7 +186,7 @@ That's it. The script will:
 # 3. Launch Claude Code
 claude
 
-# 4. Run the onboarding (generates your .cursorrules file)
+# 4. Run the onboarding (configures your AI tool)
 /onboard no-code
 ```
 

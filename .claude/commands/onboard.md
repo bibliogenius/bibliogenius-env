@@ -7,9 +7,14 @@ The argument $ARGUMENTS should be the profile type: `no-code`, `junior`, or `sen
 1. Read the project's CLAUDE.md and the Rust/Flutter sub-CLAUDE.md files to understand the full architecture rules.
 2. Based on the profile, generate a configuration bundle:
 
-### For all profiles, generate:
+### For all profiles, generate AI tool configuration files:
 
-**A `.cursorrules` file** (for Cursor users) containing:
+**Generate rules files for whichever AI tools the contributor uses:**
+- `.cursorrules` — for Cursor users
+- `.windsurfrules` — for Windsurf users
+- Note: Claude Code users are auto-configured via `CLAUDE.md` (no extra file needed)
+
+**Each rules file should contain:**
 - Project description (edtech app, Rust backend + Flutter frontend + SQLite)
 - Architecture layer rules (R1-R5, F1-F4) from CLAUDE.md, rewritten in clear language appropriate to the profile
 - The team context (who reviews PRs, who to ask for what)
@@ -64,5 +69,10 @@ The argument $ARGUMENTS should be the profile type: `no-code`, `junior`, or `sen
 - Full architecture rules as-is from CLAUDE.md
 - Emphasis on: ADR requirement, security guidelines reference, FFI contract preservation
 
-3. Output the generated `.cursorrules` content in a code block, ready to copy-paste.
-4. Also output a suggested list of hooks (as JSON for `.claude/settings.json` or Cursor equivalent) appropriate to the profile's restriction level.
+3. Ask the contributor which AI tool(s) they use (Claude Code, Cursor, Windsurf, other).
+4. Generate the appropriate config files:
+   - **Claude Code**: Already configured via `CLAUDE.md`. Just confirm setup is complete.
+   - **Cursor**: Output `.cursorrules` content in a code block, ready to copy-paste.
+   - **Windsurf**: Output `.windsurfrules` content (same format as `.cursorrules`).
+   - **Other**: Output a generic rules file the contributor can adapt.
+5. Also output a suggested list of hooks (as JSON for `.claude/settings.json` or Cursor equivalent) appropriate to the profile's restriction level.
