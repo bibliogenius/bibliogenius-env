@@ -38,8 +38,8 @@ This is the **environment repo** that orchestrates all BiblioGenius components. 
 
 ## 📚 Documentation
 
-- [NO_CODE_ONBOARDING.md](./bibliogenius-docs/docs/project-management/NO_CODE_ONBOARDING.md) - Guide for non-technical contributors
-- [CONFLUENCE_STRUCTURE.md](./bibliogenius-docs/docs/CONFLUENCE_STRUCTURE.md) - Confluence space organization
+- [NO_CODE_ONBOARDING.md](./docs/NO_CODE_ONBOARDING.md) - Guide for non-technical contributors
+- [CONFLUENCE_STRUCTURE.md](./docs/CONFLUENCE_STRUCTURE.md) - Confluence space organization
 - [CLAUDE.md](./CLAUDE.md) - Architecture rules and AI assistant guidelines
 
 ## 🚀 Quick Start
@@ -59,14 +59,16 @@ git clone https://github.com/bibliogenius/bibliogenius-env.git
 cd bibliogenius-env
 
 # Setup for your profile (no-code / junior / senior)
-python3 setup.py junior
+make setup P=junior
 
 # Then follow the on-screen instructions
 ```
 
 > **Note**: The setup script clones the right repos, configures your AI tools (Claude Code / Cursor), and guides you through the next steps.
+>
+> Alternative: `python3 setup.py junior`
 
-See [NO_CODE_ONBOARDING.md](./bibliogenius-docs/docs/project-management/NO_CODE_ONBOARDING.md) for the non-technical contributor guide.
+See [NO_CODE_ONBOARDING.md](./docs/NO_CODE_ONBOARDING.md) for the non-technical contributor guide.
 
 ## 🏗️ Architecture
 

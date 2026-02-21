@@ -25,6 +25,11 @@
 !.agents/**
 .agents/**/.DS_Store
 
+# ── Track: public documentation ──
+!docs/
+!docs/**
+docs/**/.DS_Store
+
 # ── Track: Docker environment ──
 !docker/
 !docker/**

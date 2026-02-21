@@ -233,7 +233,7 @@ def print_next_steps(profile, root_dir):
         print(f"    /onboard no-code")
         print()
         print(f"  {CYAN}Etape 3{RESET} — Lis le guide du contributeur :")
-        print(f"    bibliogenius-docs/docs/project-management/NO_CODE_ONBOARDING.md")
+        print(f"    docs/NO_CODE_ONBOARDING.md")
         print()
         print(f"  {CYAN}Etape 4{RESET} — Pour ta premiere modification :")
         print(f"    git checkout -b contrib/ma-premiere-modif")
