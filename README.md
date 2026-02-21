@@ -19,7 +19,7 @@ A decentralized, cross-platform library management system.
 
 ## 📦 Components
 
-This is a **monorepo** containing all BiblioGenius components. Each folder will be mapped to its own git repository:
+This is the **environment repo** that orchestrates all BiblioGenius components. Run `python3 setup.py <profile>` to clone what you need.
 
 ### [`bibliogenius/`](./bibliogenius)
 
@@ -36,22 +36,11 @@ This is a **monorepo** containing all BiblioGenius components. Each folder will 
 **Symfony Hub** - Optional central directory service  
 🔗 Repository: <https://github.com/bibliogenius/bibliogenius-hub>
 
-### [`bibliogenius-bundle/`](./bibliogenius-bundle)
-
-**Symfony Bundle** - Complete PHP-only alternative  
-🔗 Repository: <https://github.com/bibliogenius/bibliogenius-bundle>
-
-### [`bibliogenius-docker/`](./bibliogenius-docker)
-
-**Docker Environment** - Development setup with Docker Compose  
-🔗 Repository: <https://github.com/bibliogenius/bibliogenius-docker>
-
 ## 📚 Documentation
 
-- [`docs/ARCHITECTURE.md`](./docs/ARCHITECTURE.md) - Complete ecosystem architecture
-- [`docs/REPOSITORIES.md`](./docs/REPOSITORIES.md) - Repository structure and naming
-- [`docs/POC_ROADMAP.md`](./docs/POC_ROADMAP.md) - Proof of concept implementation plan
-- [`ROADMAP.md`](./ROADMAP.md) - Original project roadmap
+- [NO_CODE_ONBOARDING.md](./bibliogenius-docs/docs/project-management/NO_CODE_ONBOARDING.md) - Guide for non-technical contributors
+- [CONFLUENCE_STRUCTURE.md](./bibliogenius-docs/docs/CONFLUENCE_STRUCTURE.md) - Confluence space organization
+- [CLAUDE.md](./CLAUDE.md) - Architecture rules and AI assistant guidelines
 
 ## 🚀 Quick Start
 
@@ -82,41 +71,27 @@ See [NO_CODE_ONBOARDING.md](./bibliogenius-docs/docs/project-management/NO_CODE_
 ## 🏗️ Architecture
 
 ```mermaid
-┌──────────────────────────────┐
-│   E2EE Relay Hub (Blind)      │
-│   - Encrypted blob storage    │
-│   - Anonymous mailboxes       │
-│   - Zero-Knowledge            │
-└──────────────┬────────────────┘
-               │
-               │ (Encrypted blobs only)
-               │
-    ┌──────────┴──────────┐
-    │                     │
-    ▼                     ▼
-┌─────────┐           ┌─────────┐
-│ Rust    │ ◄── P2P ──│ Rust    │
-│ Server  │  (mDNS)   │ Server  │
-└────┬────┘           └────┬────┘
-     │                     │
-     │ REST API            │ REST API
-     │                     │
-     ▼                     ▼
-┌─────────┐           ┌─────────┐
-│ Flutter │           │ Flutter │
-│ App     │           │ App     │
-└─────────┘           └─────────┘
+graph TD
+    Hub["E2EE Relay Hub (Blind)<br/>Encrypted blob storage<br/>Anonymous mailboxes<br/>Zero-Knowledge"]
+
+    Hub -- "Encrypted blobs only" --> RustA
+    Hub -- "Encrypted blobs only" --> RustB
+
+    RustA["Rust Server A"] -- "P2P (mDNS)" --> RustB["Rust Server B"]
+    RustB -- "P2P (mDNS)" --> RustA
+
+    RustA -- "FFI" --> FlutterA["Flutter App A"]
+    RustB -- "FFI" --> FlutterB["Flutter App B"]
 ```
 
 ## 🤝 Contributing
 
 Each component has its own repository. Please contribute to the appropriate repo:
 
-- Rust server issues/PRs → `bibliogenius`
-- Flutter app issues/PRs → `bibliogenius-app`
-- Symfony hub issues/PRs → `bibliogenius-hub`
-- Symfony bundle issues/PRs → `bibliogenius-bundle`
-- Docker setup issues/PRs → `bibliogenius-docker`
+- Rust server issues/PRs → [`bibliogenius`](https://github.com/bibliogenius/bibliogenius)
+- Flutter app issues/PRs → [`bibliogenius-app`](https://github.com/bibliogenius/bibliogenius-app)
+- Symfony hub issues/PRs → [`bibliogenius-hub`](https://github.com/bibliogenius/bibliogenius-hub)
+- Environment / onboarding → [`bibliogenius-env`](https://github.com/bibliogenius/bibliogenius-env) (this repo)
 
 ## 📄 License
 
