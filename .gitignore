@@ -1,0 +1,33 @@
+# Ignore everything by default (sub-repos have their own git)
+*
+.DS_Store
+
+# ── Track: project-level config ──
+!.gitignore
+!CLAUDE.md
+!GEMINI.md
+!Makefile
+!setup.py
+!README.md
+!CONTRIBUTING.
+
+# ── Track: Claude Code config ──
+!.claude/
+!.claude/**
+# Exclude local/ephemeral files
+.claude/settings.local.json
+.claude/session-logs/**
+# Exclude skills (symlinks to .agents/)
+.claude/skills/
+
+# ── Track: shared skills source ──
+!.agents/
+!.agents/**
+.agents/**/.DS_Store
+
+# ── Track: Docker environment ──
+!docker/
+!docker/**
+
+# ── Track: submodule definitions ──
+!.gitmodules

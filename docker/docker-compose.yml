@@ -1,0 +1,59 @@
+services:
+  # Rust Server (Port 8001)
+  bibliogenius:
+    build:
+      context: ../bibliogenius
+      dockerfile: Dockerfile
+    container_name: bibliogenius
+    ports:
+      - "8001:8000"
+    environment:
+      - DATABASE_URL=sqlite:///app/data/bibliogenius.db?mode=rwc
+      - PORT=8000
+      - HUB_URL=http://hub:80
+    volumes:
+      - bibliogenius-data:/app/data
+    networks:
+      - bibliogenius-network
+    restart: unless-stopped
+
+  # Central Symfony Hub (registry, discovery, relay)
+  hub:
+    build:
+      context: ../bibliogenius-hub
+      dockerfile: Dockerfile
+    container_name: bibliogenius-hub
+    ports:
+      - "8081:80"
+    volumes:
+      - ../bibliogenius-hub:/app
+      - hub-data:/app/var/data
+    environment:
+      - APP_ENV=dev
+      - APP_SECRET=change_this_in_production
+      - DATABASE_URL=sqlite:////app/var/data/hub.db
+      - SERVER_NAME=:80
+      - DEFAULT_URI=http://localhost
+      - CORS_ALLOW_ORIGIN=^https?://(localhost|127\.0\.0\.1)(:[0-9]+)?$
+    networks:
+      - bibliogenius-network
+    restart: unless-stopped
+
+  builder:
+    build:
+      context: ../bibliogenius
+      dockerfile: Dockerfile
+      target: builder
+    container_name: bibliogenius-builder
+    volumes:
+      - ../bibliogenius:/app
+    working_dir: /app
+    command: cargo fetch
+
+volumes:
+  bibliogenius-data:
+  hub-data:
+
+networks:
+  bibliogenius-network:
+    driver: bridge
