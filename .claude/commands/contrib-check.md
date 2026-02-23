@@ -1,4 +1,4 @@
-Verification simplifiee pour les contributeurs no-code. Verifie que les modifications sont dans les zones autorisees et que le code est correct.
+Simplified verification for no-code contributors. Checks that modifications are within allowed zones and that the code is correct.
 
 ## Steps
 
@@ -15,7 +15,7 @@ Verification simplifiee pour les contributeurs no-code. Verifie que les modifica
    - `bibliogenius-app/lib/screens/splash_screen.dart`
    - `bibliogenius-app/assets/images/**`
 
-   If ANY file is outside these zones, report it as **PROBLEME** with a clear explanation of why it's not allowed.
+   If ANY file is outside these zones, report it as **ISSUE** with a clear explanation of why it's not allowed.
 
 3. **Flutter analysis**: For each modified `.dart` file, run `flutter analyze <file>`. Report any errors or warnings.
 
@@ -27,29 +27,29 @@ Verification simplifiee pour les contributeurs no-code. Verifie que les modifica
 5. **Output a structured report** in this format:
 
 ```
-## Resultat /contrib-check
+## /contrib-check Results
 
-### Fichiers modifies
-- fichier1.po ✅ Zone sure
-- fichier2.dart ❌ Hors zone (explication)
+### Modified files
+- file1.po ✅ Safe zone
+- file2.dart ❌ Outside safe zone (explanation)
 
-### Analyse Flutter
-- ✅ Pas d'erreur (ou liste des erreurs)
+### Flutter analysis
+- ✅ No errors (or list of errors)
 
-### Traductions
-- ✅ Format correct (ou liste des problemes)
+### Translations
+- ✅ Format correct (or list of issues)
 
 ### Verdict
-✅ PRET POUR LA PR — tu peux faire ton commit et push
-   ou
-❌ PROBLEME(S) A CORRIGER — voir les details ci-dessus
+✅ READY FOR PR — you can commit and push
+   or
+❌ ISSUE(S) TO FIX — see details above
 ```
 
 6. If the verdict is OK, remind the contributor of the next steps:
    ```
-   git add <fichiers>
-   git commit -m "contrib: description de la modif"
-   git push -u origin contrib/ta-branche
+   git add <files>
+   git commit -m "contrib: short description of the change"
+   git push -u origin contrib/your-branch
    ```
 
 7. If there are problems, explain each one in simple terms and suggest how to fix it.
