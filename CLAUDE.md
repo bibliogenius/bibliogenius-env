@@ -1,5 +1,10 @@
 # BiblioGenius Architecture
 
+## Writing Style
+
+> **Do NOT use em dashes (—) in generated text** (code comments, ADRs, commit messages, docs, UI strings, etc.).
+> Use regular dashes (-), colons, or rephrase instead. Em dashes are not the project's style.
+
 ## Git Policy
 
 > **Claude MUST NEVER create commits automatically.** The user handles all git operations (add, commit, push, merge) themselves. Claude may suggest commit messages but must not execute `git commit`, `git push`, or `git merge`.
@@ -225,6 +230,7 @@ The Rust core exposes TWO interfaces. Both call the same domain/service layer:
 4. **FFI contract preserved** — frb.rs structs unchanged (or Flutter updated in sync)
 5. **Model fields preserved** — no field renames/removals in models/*.rs
 6. **ADR written if needed** — see ADR rule below
+7. **No hardcoded user IDs** — NEVER use `user_id = 1` or any literal ID. Always fetch the real user ID dynamically (e.g. `repo.get_user_id()` in gamification, or query the `users` table). The local user's ID is assigned by SQLite autoincrement and is NOT predictable.
 
 > **If the architecture needs to evolve** (e.g., switching from SQLite to Postgres,
 > or from Provider to Riverpod), update THIS section FIRST, then implement.
