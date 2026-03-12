@@ -1,0 +1,13 @@
+# BiblioGenius - Windsurf Rules
+
+All project instructions are in `AGENTS.md` at the repository root.
+Read `AGENTS.md` and the instruction files it references (in `.agents/instructions/`) before making any changes.
+
+Quick index:
+- Policies (git, deployment, logging, performance): `.agents/instructions/policies.md`
+- Architecture enforcement (layer rules, stack): `.agents/instructions/architecture.md`
+- Rust backend conventions: `.agents/instructions/rust-backend.md`
+- Flutter frontend conventions: `.agents/instructions/flutter-frontend.md`
+- Documentation sync policy: `.agents/instructions/docs.md`
+- Security guidelines: `bibliogenius-docs/docs/technical/SECURITY_GUIDELINES.md`
+- Skills: `.agents/skills/`

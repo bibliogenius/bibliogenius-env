@@ -4,8 +4,11 @@
 
 # ── Track: project-level config ──
 !.gitignore
+!AGENTS.md
 !CLAUDE.md
 !GEMINI.md
+!.cursorrules
+!.windsurfrules
 !Makefile
 !setup.py
 !README.md
