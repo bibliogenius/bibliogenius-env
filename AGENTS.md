@@ -44,6 +44,12 @@ Specialized agent skills in `.agents/skills/`:
 
 ---
 
+## Communication
+
+When in doubt about a requirement, architecture decision, or implementation approach, **ask the user before proceeding**. A clarifying question is always better than a wrong assumption.
+
+---
+
 ## Quick Reference - Post-Development Checks
 
 ```bash
