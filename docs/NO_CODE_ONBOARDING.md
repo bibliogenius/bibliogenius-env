@@ -12,7 +12,7 @@ and discover new titles through open sources (Inventaire, OpenLibrary).
 - **The database**: SQLite (a local file)
 - The interface calls the engine directly via FFI (Foreign Function Interface — a bridge that lets Flutter talk to Rust without going through a web server)
 
-**Current version**: v0.7.x (pre-alpha)
+**Current version**: v0.8.x (alpha)
 
 **What already works**: book scanning (ISBN, cover), personal catalog,
 multi-source search, gamification, local network exchanges between contacts,
