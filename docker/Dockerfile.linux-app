@@ -1,0 +1,52 @@
+# Flutter Linux app runner (x86_64)
+# Usage: test the Linux bundle built from the Flutter app
+FROM ubuntu:24.04
+
+ENV DEBIAN_FRONTEND=noninteractive
+
+RUN apt-get update && apt-get install -y \
+    # GTK3 (required by Flutter Linux)
+    libgtk-3-0 \
+    # System libs
+    libblkid1 \
+    liblzma5 \
+    # App dependencies
+    libsecret-1-0 \
+    libsqlite3-0 \
+    libssl3t64 \
+    # X11 support for GUI forwarding
+    xdg-utils \
+    libx11-6 \
+    libxcomposite1 \
+    libxdamage1 \
+    libxext6 \
+    libxfixes3 \
+    libxrandr2 \
+    libxrender1 \
+    libxtst6 \
+    # Virtual display for headless mode
+    xvfb \
+    # VNC server + lightweight window manager
+    x11vnc \
+    fluxbox \
+    # noVNC (browser-based VNC client)
+    novnc websockify \
+    # Keyring (required by flutter_secure_storage)
+    gnome-keyring \
+    dbus-x11 \
+    libpam-gnome-keyring \
+    && rm -rf /var/lib/apt/lists/*
+
+# Create non-root user (gnome-keyring requires this)
+RUN useradd -m -s /bin/bash appuser \
+    && mkdir -p /home/appuser/.local/share/keyrings \
+    && chown -R appuser:appuser /home/appuser
+
+WORKDIR /app
+
+# Bundle is mounted as a volume — no COPY needed
+COPY entrypoint.sh /usr/local/bin/entrypoint.sh
+RUN chmod +x /usr/local/bin/entrypoint.sh
+
+USER appuser
+ENTRYPOINT ["entrypoint.sh"]

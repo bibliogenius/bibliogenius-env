@@ -40,9 +40,10 @@ help:
 	@echo "  $(GREEN)make bundle-macos   $(RESET): Bundle Rust backend and build macOS app (Standalone)"
 	@echo "  $(GREEN)make test           $(RESET): Run all tests (Rust + Flutter)"
 	@echo ""
-	@echo "$(CYAN)🏷️  Versioning:$(RESET)"
+	@echo "$(CYAN)🏷️  Versioning & Release:$(RESET)"
 	@echo "  $(GREEN)make version V=x.y.z$(RESET): Update version in all project files"
 	@echo "  $(GREEN)make show-version   $(RESET): Show current version across all components"
+	@echo "  $(GREEN)make release V=x.y.z$(RESET): Full release: version + cargo lock + site build + commit & push"
 	@echo ""
 
 # =============================================================================
@@ -71,14 +72,37 @@ ifndef V
 endif
 	@echo "$(CYAN)🏷️  Updating version to $(V)...$(RESET)"
 	@sed -i '' 's/^version = ".*"/version = "$(V)"/' bibliogenius/Cargo.toml
-	@sed -i '' 's/^version: .*/version: $(V)+1/' bibliogenius-app/pubspec.yaml
+	$(eval BUILD := $(shell grep '^version: ' bibliogenius-app/pubspec.yaml | sed 's/.*+//'))
+	$(eval NEXT_BUILD := $(shell echo $$(( $(BUILD) + 1 ))))
+	@sed -i '' 's/^version: .*/version: $(V)+$(NEXT_BUILD)/' bibliogenius-app/pubspec.yaml
 	@sed -i '' 's/"version": ".*"/"version": "$(V)"/' bibliogenius-hub/composer.json
 	@sed -i '' 's/\*\*Status\*\*: v.*/\*\*Status\*\*: v$(V) (Beta Testing)/' README.md
+	@echo '$(V)' > bibliogenius-public/_build/version.txt
 	@echo "$(GREEN)✅ Version updated to $(V) in:$(RESET)"
 	@echo "   - bibliogenius/Cargo.toml"
-	@echo "   - bibliogenius-app/pubspec.yaml"
+	@echo "   - bibliogenius-app/pubspec.yaml (build $(NEXT_BUILD))"
 	@echo "   - bibliogenius-hub/composer.json"
+	@echo "   - bibliogenius-public/_build/version.txt"
 	@echo "   - README.md"
+
+release: version cargo-lock build-site push-version
+
+cargo-lock:
+	@echo "$(CYAN)🔒 Updating Cargo.lock...$(RESET)"
+	@cd bibliogenius && cargo update --workspace
+
+build-site:
+	@echo "$(CYAN)🌐 Rebuilding public site...$(RESET)"
+	@cd bibliogenius-public && python3 _build/build.py
+
+push-version:
+	@echo "$(CYAN)📤 Committing and pushing version $(V)...$(RESET)"
+	@cd bibliogenius && git add Cargo.toml Cargo.lock && git commit -m "update to version $(V)" && git push
+	@cd bibliogenius-app && git add pubspec.yaml && git commit -m "update to version $(V)" && git push
+	@cd bibliogenius-hub && git add composer.json && git commit -m "update to version $(V)" && git push
+	@cd bibliogenius-public && git add _build/version.txt contribute.html en/contribute.html de/contribute.html es/contribute.html && git commit -m "update to version $(V)" && git push
+	@git add README.md && git commit -m "update to version $(V)" && git push
+	@echo "$(GREEN)✅ Version $(V) committed and pushed to all repos.$(RESET)"
 
 show-version:
 	@echo "$(CYAN)📦 Current versions:$(RESET)"

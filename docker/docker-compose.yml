@@ -50,6 +50,26 @@ services:
     working_dir: /app
     command: cargo fetch
 
+  # Flutter Linux app testing
+  # Usage:
+  #   Smoke test:    docker compose run --rm linux-app smoke
+  #   API testing:   docker compose run --rm -d --service-ports linux-app
+  #   VNC (browser): docker compose run --rm --service-ports linux-app vnc
+  #                  then open http://localhost:6080/vnc.html
+  linux-app:
+    platform: linux/amd64
+    build:
+      context: .
+      dockerfile: Dockerfile.linux-app
+    container_name: bibliogenius-linux-app
+    volumes:
+      - ../_ressources/bundle:/app
+    ports:
+      - "8042:8000"
+      - "6080:6080"
+    networks:
+      - bibliogenius-network
+
 volumes:
   bibliogenius-data:
   hub-data:
