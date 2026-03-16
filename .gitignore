@@ -22,8 +22,11 @@
 .claude/session-logs/**
 # Exclude skills (symlinks to .agents/)
 .claude/skills/
-# Exclude worktrees 
+# Exclude worktrees
 .claude/worktrees/
+# Exclude personal (local-only) commands and skills
+.claude/commands/local/
+.claude/skills/local/
 
 # ── Track: shared skills source ──
 !.agents/
