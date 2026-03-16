@@ -97,11 +97,11 @@ build-site:
 
 push-version:
 	@echo "$(CYAN)📤 Committing and pushing version $(V)...$(RESET)"
-	@cd bibliogenius && git add Cargo.toml Cargo.lock && git commit -m "update to version $(V)" && git push
-	@cd bibliogenius-app && git add pubspec.yaml && git commit -m "update to version $(V)" && git push
-	@cd bibliogenius-hub && git add composer.json && git commit -m "update to version $(V)" && git push
-	@cd bibliogenius-public && git add _build/version.txt contribute.html en/contribute.html de/contribute.html es/contribute.html && git commit -m "update to version $(V)" && git push
-	@git add README.md && git commit -m "update to version $(V)" && git push
+	@cd bibliogenius && git add Cargo.toml Cargo.lock && (git diff --cached --quiet || git commit -m "update to version $(V)") && git push
+	@cd bibliogenius-app && git add pubspec.yaml && (git diff --cached --quiet || git commit -m "update to version $(V)") && git push
+	@cd bibliogenius-hub && git add composer.json && (git diff --cached --quiet || git commit -m "update to version $(V)") && git push
+	@cd bibliogenius-public && git add _build/version.txt contribute.html en/contribute.html de/contribute.html es/contribute.html && (git diff --cached --quiet || git commit -m "update to version $(V)") && git push
+	@git add README.md && (git diff --cached --quiet || git commit -m "update to version $(V)") && git push
 	@echo "$(GREEN)✅ Version $(V) committed and pushed to all repos.$(RESET)"
 
 show-version:
