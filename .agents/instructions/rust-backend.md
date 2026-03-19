@@ -416,6 +416,10 @@ pub async fn fetch_inventaire_metadata(isbn: &str) -> Result<Metadata, String> {
 - [ ] Crypto secrets: `Zeroize` + `SecretBox` wrappers (see SECURITY_GUIDELINES.md A1)
 - [ ] No secrets in logs, even in debug builds (see SECURITY_GUIDELINES.md A2)
 - [ ] Crate audit: `cargo audit` clean before release (see SECURITY_GUIDELINES.md A4)
+- [ ] Relay: read_token NEVER sent to hub or included in outbound payloads (S2)
+- [ ] Relay: credential refresh via hub MUST verify x25519 key match before trusting (S3)
+- [ ] Relay: connection_request payloads MUST include relay credentials for bidirectional comms
+- [ ] Catalog: cover_url pushed to hub MUST be HTTP/HTTPS, never local file paths (S5)
 
 ---
 

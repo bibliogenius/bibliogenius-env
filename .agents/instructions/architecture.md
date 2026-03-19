@@ -24,6 +24,37 @@
 > **Before modifying ANY code in `bibliogenius/src/crypto/`, `bibliogenius/src/services/crypto_service.rs`, `bibliogenius/src/services/relay_service.rs`, `bibliogenius/src/api/e2ee.rs`, or any code handling secrets (keys, tokens, passwords), you MUST read `bibliogenius-docs/docs/technical/SECURITY_GUIDELINES.md`.**
 > This file contains the binding security audit results (14 findings, Feb 2026) and the corrected crypto pipeline.
 
+### Relay & Hub Security Rules (MANDATORY)
+
+> These rules protect the P2P relay infrastructure. Violations MUST block CI/tests.
+
+**S1: Hub profile MUST NOT expose relay credentials publicly (OWASP A01)**
+- `toPublicArray()` in `LibraryProfile.php` MUST NEVER include `relay_url`, `relay_mailbox_id`, or `relay_write_token`.
+- Relay credentials are returned ONLY to authenticated requesters (valid Bearer token).
+- Test: any hub endpoint returning profile data without auth MUST NOT contain relay fields.
+
+**S2: Relay read_token MUST NEVER leave the device**
+- Only `write_token` (allows depositing messages) may be shared via invite links or stored on the hub.
+- `read_token` (allows reading and deleting messages from a mailbox) MUST NEVER be sent to the hub, included in invite payloads, or logged.
+- Test: grep for `read_token` in any outbound payload or hub registration body.
+
+**S3: Peer identity verification on credential refresh**
+- When refreshing relay credentials via the hub, the `x25519_public_key` from the hub profile MUST match the locally stored key for that peer.
+- If keys do not match, reject the credentials and log a warning. Do NOT update the peer record.
+- This prevents an attacker from registering a fake profile to redirect messages to their mailbox.
+- Test: `refresh_via_hub` must reject credentials when x25519 key mismatches.
+
+**S4: Input validation on relay fields (OWASP A03)**
+- `relay_mailbox_id`: UUID format only (36 chars with dashes, hex + dashes).
+- `relay_write_token`: hex-only string, max 128 chars.
+- `relay_url`: valid HTTPS URL only (sanitized via `sanitizeUrl`).
+- Test: hub must reject malformed relay fields on profile registration.
+
+**S5: No local file paths in hub catalog data**
+- `cover_url` pushed to hub cached_catalogs MUST NOT contain local filesystem paths (e.g. `/var/mobile/...`).
+- Only HTTP/HTTPS URLs are valid for cover images in catalog payloads.
+- Test: catalog push must filter out non-HTTP cover URLs.
+
 ---
 
 ## Current Architecture Stack
@@ -271,6 +302,8 @@ Every `tooltip` on an `IconButton` and every `semanticLabel` on an `Image` MUST 
 8. **Accessibility preserved** - new/modified widgets have `Semantics`, `tooltip`, `semanticLabel` where required (Rules A1-A4). No new contrast violations introduced.
 9. **No hardcoded hub URL** - `hub.bibliogenius.org` must only appear in `ApiService.hubUrl` (production fallback). Everywhere else, use `ApiService.hubUrl` or pass `hubBaseUrl` as parameter.
 10. **Consult ADRs when in doubt** - before implementing or modifying networking, E2EE, relay, invite, or sync features, read the relevant ADRs in `bibliogenius-docs/docs/technical/adr/`. They document the intended architecture and fallback patterns (e.g. ADR-004 relay fallback, ADR-009 invite deep links).
+11. **Relay security rules S1-S5 respected** - see Relay & Hub Security Rules above. Any change touching relay, hub profiles, invite payloads, or catalog push MUST be verified against S1-S5.
+12. **Tests updated** - any new security rule, bug fix, or behavior change MUST have corresponding test coverage. Tests MUST enforce security invariants (S1-S5) so violations are caught automatically.
 
 > **If the architecture needs to evolve** (e.g., switching from SQLite to Postgres,
 > or from Provider to Riverpod), update THIS file FIRST, then implement.
