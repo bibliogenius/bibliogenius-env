@@ -27,6 +27,7 @@
 # Exclude personal (local-only) commands and skills
 .claude/commands/local/
 .claude/skills/local/
+.claude/.DS_Store
 
 # ── Track: shared skills source ──
 !.agents/
