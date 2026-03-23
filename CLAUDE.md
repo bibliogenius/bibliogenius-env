@@ -1,7 +1,8 @@
 # BiblioGenius - Claude Code
 
-> **All project instructions are centralized in [`AGENTS.md`](AGENTS.md).**
-> Read `AGENTS.md` and the instruction files it references (in `.agents/instructions/`) before making any changes.
+> **STOP. Before writing ANY code, you MUST read [`AGENTS.md`](AGENTS.md).**
+> This is not optional. Do it now, at the start of every session, before any tool call that modifies files.
+> `AGENTS.md` references instruction files in `.agents/instructions/` -- read the relevant ones too.
 > Those instructions are the single source of truth for architecture, policies, and conventions.
 
 ## Claude-Specific Configuration
