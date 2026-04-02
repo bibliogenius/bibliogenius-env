@@ -159,9 +159,11 @@ class _FilterBar extends StatelessWidget {
 // AVOID: Business logic in widgets
 ```
 
-### DRY - No Duplicated Styling
+### DRY - Single Source of Truth
 
-When multiple widgets share the same visual style (colors, decorations, paddings), extract shared values into file-level helpers (constants, functions, or a small utility class). Do NOT copy-paste `BoxDecoration`, color definitions, or icon badge patterns across widgets.
+**Business logic**: Any computation, rule, or default value used in more than one place MUST be extracted into a single function/getter in the owning provider or service. Callers invoke the shared method -- they never inline the logic. This applies to: default values, name generation, validation rules, URL construction, formatting, etc.
+
+**Styling**: When multiple widgets share the same visual style (colors, decorations, paddings), extract shared values into file-level helpers (constants, functions, or a small utility class). Do NOT copy-paste `BoxDecoration`, color definitions, or icon badge patterns across widgets.
 
 ```dart
 // GOOD: shared helpers at top of file
