@@ -617,6 +617,7 @@ Must pass before considering work complete.
 - [ ] Debounce search/filter inputs (300ms)
 - [ ] Use `CachedNetworkImage` for remote images
 - [ ] Avoid business logic in `build()` methods
+- [ ] **Provider in list items**: Never use `context.watch` or `Consumer` on a broad ChangeNotifier inside a list item widget — this causes O(N×M) rebuilds (N items × M notifications). Use `Selector<Provider, T>` with a cheap comparable `T` (bool, String, int) so only the affected items rebuild, and only when their specific value changes.
 
 ## Accessibility Checklist
 
