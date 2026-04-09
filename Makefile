@@ -119,6 +119,11 @@ test:
 	cd bibliogenius-app && flutter test --reporter compact
 	@echo "$(GREEN)✅ All tests passed!$(RESET)"
 
+check-rust:
+	@echo "$(CYAN)Running Rust post-dev checks (fmt + clippy + test)...$(RESET)"
+	cd bibliogenius && cargo fmt && cargo clippy -- -D warnings && cargo test
+	@echo "$(GREEN)✅ Rust checks passed!$(RESET)"
+
 test-rust:
 	@echo "$(YELLOW)Running Rust tests...$(RESET)"
 	cd bibliogenius && cargo test
