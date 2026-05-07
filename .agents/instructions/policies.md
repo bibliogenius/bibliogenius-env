@@ -20,6 +20,28 @@ These policies apply to ALL agents and contributors working on the project.
 > This includes: entitlements (`.entitlements`), provisioning profiles, Xcode project settings (`.pbxproj`), signing configurations, `Info.plist` (iOS/macOS), `AndroidManifest.xml`, Podfile, Gradle files, and any CI/CD pipeline files.
 > Always ask before touching these files - deployment was hard-won and regressions are unacceptable.
 
+## Server Access Policy
+
+> **Agents MUST NOT execute commands on production or staging servers** (SSH to the VPS, `gh workflow run` with side effects, manual deploy scripts, container restarts, DB queries against managed PostgreSQL, etc.).
+> The user runs all server-side commands. Agents draft the exact commands and present them for the user to copy-paste.
+> **Read-only inspection** (`ssh ... 'cat /etc/foo'`, `systemctl status`, log tailing) is permitted **only** when the user explicitly authorizes it for the current task. Default behavior: hand the command to the user.
+> Rationale: production access requires human judgment and audit trail; agents should not silently mutate live infrastructure.
+
+## Configuration Source-of-Truth Policy
+
+> **Before modifying any production configuration** (`Caddyfile`, `nginx.conf`, `docker-compose.*.yml`, systemd units, deploy scripts, `.env.*.config` templates, etc.), agents MUST first locate the version-controlled source. **Never edit the live file directly.**
+>
+> **Procedure (mandatory, in this order):**
+> 1. Search the repo tree for matching filenames — not just the live path. Try variants: `Caddyfile`, `Caddyfile.vps`, `Caddyfile.prod`, `*.Caddyfile`, etc.
+> 2. Read the header of each candidate: a comment like `# Installed on the host at /etc/X` or `# Deployed to ...` is a strong source-of-truth signal.
+> 3. If a source file exists → edit it there, then hand the user the deploy command (per Server Access Policy).
+> 4. If **no** source file is found → **ask the user** where the source-of-truth lives before touching anything live. Do not edit the live file as a fallback.
+> 5. If the deploy pipeline does **not** auto-sync this file from the repo (drift-by-design), flag it explicitly and propose adding the sync — but do not silently work around it by editing live.
+>
+> Cost of asking: 30 seconds. Cost of drift: the next legitimate deploy silently overwrites your fix, or the repo lies about live state for weeks until someone gets burned.
+>
+> **Failure mode this rule prevents:** an agent edits `/etc/caddy/Caddyfile` via SSH to add a vhost; the source file `Caddyfile.vps` in the repo never gets the change; weeks later a teammate edits `Caddyfile.vps` and pushes a new version that wipes the live vhost.
+
 ## Operation Log Policy
 
 > **NEVER log sensitive or personal data in operation_log payloads.**
