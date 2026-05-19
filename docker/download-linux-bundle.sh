@@ -1,10 +1,17 @@
 #!/bin/bash
 set -e
 
-# Download the latest Linux bundle from GitHub Releases.
+# Download the latest Linux bundle from Codeberg Releases.
 # Usage: ./download-linux-bundle.sh [version]
 #   ./download-linux-bundle.sh          # latest release
 #   ./download-linux-bundle.sh v0.8.6   # specific version
+#
+# NOTE: Requires the .tar.gz asset to exist in Codeberg Releases for the target tag.
+# Past GitHub Releases binaries have NOT been migrated to Codeberg — until they are
+# re-uploaded or a new release publishes via the new CI pipeline, this script will
+# fail with 404 for older tags. The `gh` CLI fallback below is GitHub-only and will
+# also fail post-migration; the curl path against the Codeberg API is the supported
+# code path.
 
 REPO="bibliogenius/bibliogenius-app"
 DEST="../_ressources/bundle"
@@ -25,16 +32,16 @@ if [ "$VERSION" = "latest" ]; then
     URL=$(gh release view --repo "$REPO" --json assets --jq '.assets[] | select(.name | test("Linux")) | .url' 2>/dev/null)
     TAG=$(gh release view --repo "$REPO" --json tagName --jq '.tagName' 2>/dev/null)
   else
-    TAG=$(curl -sf "https://api.github.com/repos/$REPO/releases/latest" | grep '"tag_name"' | cut -d'"' -f4)
-    URL="https://github.com/$REPO/releases/download/$TAG/BiblioGenius-Linux.tar.gz"
+    TAG=$(curl -sf "https://codeberg.org/api/v1/repos/$REPO/releases/latest" | grep '"tag_name"' | cut -d'"' -f4)
+    URL="https://codeberg.org/$REPO/releases/download/$TAG/BiblioGenius-Linux.tar.gz"
   fi
 else
   TAG="$VERSION"
-  URL="https://github.com/$REPO/releases/download/$TAG/BiblioGenius-Linux.tar.gz"
+  URL="https://codeberg.org/$REPO/releases/download/$TAG/BiblioGenius-Linux.tar.gz"
 fi
 
 if [ -z "$URL" ] && [ -z "$TAG" ]; then
-  echo "❌ Could not find a release. Check https://github.com/$REPO/releases"
+  echo "❌ Could not find a release. Check https://codeberg.org/$REPO/releases"
   exit 1
 fi
 

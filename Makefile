@@ -77,12 +77,12 @@ endif
 	@sed -i '' 's/^version: .*/version: $(V)+$(NEXT_BUILD)/' bibliogenius-app/pubspec.yaml
 	@sed -i '' 's/"version": ".*"/"version": "$(V)"/' bibliogenius-hub/composer.json
 	@sed -i '' 's/\*\*Status\*\*: v.*/\*\*Status\*\*: v$(V) (Beta Testing)/' README.md
-	@echo '$(V)' > bibliogenius-public/_build/version.txt
+	@echo '$(V)' > bibliogenius-website/_build/version.txt
 	@echo "$(GREEN)✅ Version updated to $(V) in:$(RESET)"
 	@echo "   - bibliogenius/Cargo.toml"
 	@echo "   - bibliogenius-app/pubspec.yaml (build $(NEXT_BUILD))"
 	@echo "   - bibliogenius-hub/composer.json"
-	@echo "   - bibliogenius-public/_build/version.txt"
+	@echo "   - bibliogenius-website/_build/version.txt"
 	@echo "   - README.md"
 
 release: version cargo-lock build-site push-version
@@ -93,14 +93,14 @@ cargo-lock:
 
 build-site:
 	@echo "$(CYAN)🌐 Rebuilding public site...$(RESET)"
-	@cd bibliogenius-public && python3 _build/build.py
+	@cd bibliogenius-website && python3 _build/build.py
 
 push-version:
 	@echo "$(CYAN)📤 Committing and pushing version $(V)...$(RESET)"
 	@cd bibliogenius && git add Cargo.toml Cargo.lock && (git diff --cached --quiet || git commit -m "update to version $(V)") && git push
 	@cd bibliogenius-app && git add pubspec.yaml && (git diff --cached --quiet || git commit -m "update to version $(V)") && git push
 	@cd bibliogenius-hub && git add composer.json && (git diff --cached --quiet || git commit -m "update to version $(V)") && git push
-	@cd bibliogenius-public && git add _build/version.txt contribute.html en/contribute.html de/contribute.html es/contribute.html && (git diff --cached --quiet || git commit -m "update to version $(V)") && git push
+	@cd bibliogenius-website && git add _build/version.txt contribute.html en/contribute.html de/contribute.html es/contribute.html && (git diff --cached --quiet || git commit -m "update to version $(V)") && git push
 	@git add README.md && (git diff --cached --quiet || git commit -m "update to version $(V)") && git push
 	@echo "$(GREEN)✅ Version $(V) committed and pushed to all repos.$(RESET)"
 

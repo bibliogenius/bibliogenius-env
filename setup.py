@@ -27,7 +27,7 @@ from pathlib import Path
 
 # ─── Configuration ───
 
-GITHUB_ORG = "https://github.com/bibliogenius"
+CODEBERG_ORG = "https://codeberg.org/bibliogenius"
 
 # Repos needed per profile
 REPOS_BY_PROFILE = {
@@ -155,7 +155,7 @@ def clone_repos(profile, root_dir):
             warn(f"{repo_name}/ existe mais n'est pas un repo git — ignore")
         else:
             info(f"Clonage de {repo_name}...")
-            url = f"{GITHUB_ORG}/{repo_name}.git"
+            url = f"{CODEBERG_ORG}/{repo_name}.git"
             try:
                 run(["git", "clone", url, str(repo_path)])
                 success(f"{repo_name}/ ... clone")

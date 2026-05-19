@@ -161,7 +161,7 @@ Install these tools before starting:
 
 ```bash
 # 1. Clone the environment repo
-git clone https://github.com/bibliogenius/bibliogenius-env.git
+git clone https://codeberg.org/bibliogenius/bibliogenius-env.git
 cd bibliogenius-env
 
 # 2. Run the setup (one command!)

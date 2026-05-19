@@ -24,17 +24,17 @@ This is the **environment repo** that orchestrates all BiblioGenius components. 
 ### [`bibliogenius/`](./bibliogenius)
 
 **Rust Server** - Autonomous library server with REST API  
-🔗 Repository: <https://github.com/bibliogenius/bibliogenius>
+🔗 Repository: <https://codeberg.org/bibliogenius/bibliogenius>
 
 ### [`bibliogenius-app/`](./bibliogenius-app)
 
 **Flutter Apps** - Mobile and desktop applications  
-🔗 Repository: <https://github.com/bibliogenius/bibliogenius-app>
+🔗 Repository: <https://codeberg.org/bibliogenius/bibliogenius-app>
 
 ### [`bibliogenius-hub/`](./bibliogenius-hub)
 
 **Symfony Hub** - Optional central directory service  
-🔗 Repository: <https://github.com/bibliogenius/bibliogenius-hub>
+🔗 Repository: <https://codeberg.org/bibliogenius/bibliogenius-hub>
 
 ## 📚 Documentation
 
@@ -52,7 +52,7 @@ Get the app from [bibliogenius.org](https://bibliogenius.org) or your favorite a
 
 ```bash
 # Clone the environment repo
-git clone https://github.com/bibliogenius/bibliogenius-env.git
+git clone https://codeberg.org/bibliogenius/bibliogenius-env.git
 cd bibliogenius-env
 
 # Setup for your profile (no-code / junior / senior)
@@ -90,10 +90,10 @@ graph TD
 
 Each component has its own repository. Please contribute to the appropriate repo:
 
-- Rust server issues/PRs → [`bibliogenius`](https://github.com/bibliogenius/bibliogenius)
-- Flutter app issues/PRs → [`bibliogenius-app`](https://github.com/bibliogenius/bibliogenius-app)
-- Symfony hub issues/PRs → [`bibliogenius-hub`](https://github.com/bibliogenius/bibliogenius-hub)
-- Environment / onboarding → [`bibliogenius-env`](https://github.com/bibliogenius/bibliogenius-env) (this repo)
+- Rust server issues/PRs → [`bibliogenius`](https://codeberg.org/bibliogenius/bibliogenius)
+- Flutter app issues/PRs → [`bibliogenius-app`](https://codeberg.org/bibliogenius/bibliogenius-app)
+- Symfony hub issues/PRs → [`bibliogenius-hub`](https://codeberg.org/bibliogenius/bibliogenius-hub)
+- Environment / onboarding → [`bibliogenius-env`](https://codeberg.org/bibliogenius/bibliogenius-env) (this repo)
 
 ## 📄 License
 
@@ -104,8 +104,8 @@ AGPL-3.0-or-later - see LICENSE file in each repository
 **Federico CALO**
 
 - Website: <https://federico-calo.net>
-- GitHub: [@federico-calo](https://github.com/federico-calo)
-- Organization: [@bibliogenius](https://github.com/bibliogenius)
+- Codeberg: [@federico-calo](https://codeberg.org/federico-calo)
+- Organization: [@bibliogenius](https://codeberg.org/bibliogenius)
 
 ---
 
