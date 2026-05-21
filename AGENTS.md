@@ -103,6 +103,12 @@ cd bibliogenius-app && flutter analyze lib/
 
 ---
 
+## Response Formatting
+
+Do not use Markdown blockquotes (`>`) in chat responses. They render as a `▎` bar that gets in the way when copy-pasting. Present quoted text, drafts, or any copy-paste-ready content as plain text or fenced code blocks instead.
+
+---
+
 ## Project Overview
 
 BiblioGenius is a personal library management app.
