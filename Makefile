@@ -1,4 +1,4 @@
-.PHONY: help setup install-all install-hub install-bundle install-rust start stop logs app app-chrome version show-version
+.PHONY: help setup install-all install-hub install-bundle install-rust start stop logs app app-chrome version version-app show-version release cargo-lock push-release ship ship-ios ship-mac ship-android
 
 # Colors
 YELLOW := \033[1;33m
@@ -41,9 +41,17 @@ help:
 	@echo "  $(GREEN)make test           $(RESET): Run all tests (Rust + Flutter)"
 	@echo ""
 	@echo "$(CYAN)🏷️  Versioning & Release:$(RESET)"
-	@echo "  $(GREEN)make version V=x.y.z$(RESET): Update version in all project files"
+	@echo "  $(GREEN)make release V=x.y.z$(RESET): Bump app version + Cargo.lock + commit + push + git tag"
+	@echo "  $(GREEN)make version V=x.y.z$(RESET): Sync version across ALL files (adds hub + website)"
 	@echo "  $(GREEN)make show-version   $(RESET): Show current version across all components"
-	@echo "  $(GREEN)make release V=x.y.z$(RESET): Full release: version + cargo lock + site build + commit & push"
+	@echo ""
+	@echo "$(CYAN)🚢 Ship to stores (fastlane):$(RESET)"
+	@echo "  $(GREEN)make ship           $(RESET): Build & upload iOS + macOS + Android"
+	@echo "  $(GREEN)make ship-ios       $(RESET): Build & upload iOS only"
+	@echo "  $(GREEN)make ship-mac       $(RESET): Build & upload macOS only"
+	@echo "  $(GREEN)make ship-android   $(RESET): Build & upload Android only"
+	@echo ""
+	@echo "  $(YELLOW)Full release procedure: see RELEASING.md$(RESET)"
 	@echo ""
 
 # =============================================================================
@@ -62,47 +70,47 @@ endif
 	@python3 setup.py $(P)
 
 # =============================================================================
-# VERSIONING
+# VERSIONING & RELEASE
 # =============================================================================
-# Usage: make version V=1.0.0-beta.2
-version:
+# make release V=x.y.z : bump app version + Cargo.lock + commit + push + git tag
+#                        (bibliogenius + bibliogenius-app only)
+# make version V=x.y.z : same bump, extended to hub + website files, no commit
+#                        (rare full resync)
+
+# Bumps the version in the app-coupled files only.
+version-app:
 ifndef V
-	@echo "$(YELLOW)⚠️  Usage: make version V=1.0.0-beta.2$(RESET)"
+	@echo "$(YELLOW)⚠️  Usage: make release V=1.0.0-beta.2$(RESET)"
 	@exit 1
 endif
-	@echo "$(CYAN)🏷️  Updating version to $(V)...$(RESET)"
+	@echo "$(CYAN)🏷️  Updating app version to $(V)...$(RESET)"
 	@sed -i '' 's/^version = ".*"/version = "$(V)"/' bibliogenius/Cargo.toml
 	$(eval BUILD := $(shell grep '^version: ' bibliogenius-app/pubspec.yaml | sed 's/.*+//'))
 	$(eval NEXT_BUILD := $(shell echo $$(( $(BUILD) + 1 ))))
 	@sed -i '' 's/^version: .*/version: $(V)+$(NEXT_BUILD)/' bibliogenius-app/pubspec.yaml
-	@sed -i '' 's/"version": ".*"/"version": "$(V)"/' bibliogenius-hub/composer.json
 	@sed -i '' 's/\*\*Status\*\*: v.*/\*\*Status\*\*: v$(V) (Beta Testing)/' README.md
-	@echo '$(V)' > bibliogenius-website/_build/version.txt
-	@echo "$(GREEN)✅ Version updated to $(V) in:$(RESET)"
-	@echo "   - bibliogenius/Cargo.toml"
-	@echo "   - bibliogenius-app/pubspec.yaml (build $(NEXT_BUILD))"
-	@echo "   - bibliogenius-hub/composer.json"
-	@echo "   - bibliogenius-website/_build/version.txt"
-	@echo "   - README.md"
+	@echo "$(GREEN)✅ Version $(V) set: Cargo.toml, pubspec.yaml (build $(NEXT_BUILD)), README.md$(RESET)"
 
-release: version cargo-lock build-site push-version
+# Extends version-app to the independently-deployed hub + website files.
+version: version-app
+	@sed -i '' 's/"version": ".*"/"version": "$(V)"/' bibliogenius-hub/composer.json
+	@echo '$(V)' > bibliogenius-website/_build/version.txt
+	@echo "$(GREEN)✅ Also synced: bibliogenius-hub/composer.json, bibliogenius-website/_build/version.txt$(RESET)"
+
+release: version-app cargo-lock push-release
 
 cargo-lock:
 	@echo "$(CYAN)🔒 Updating Cargo.lock...$(RESET)"
 	@cd bibliogenius && cargo update --workspace
 
-build-site:
-	@echo "$(CYAN)🌐 Rebuilding public site...$(RESET)"
-	@cd bibliogenius-website && python3 _build/build.py
-
-push-version:
-	@echo "$(CYAN)📤 Committing and pushing version $(V)...$(RESET)"
+push-release:
+	@echo "$(CYAN)📤 Committing, pushing and tagging version $(V)...$(RESET)"
 	@cd bibliogenius && git add Cargo.toml Cargo.lock && (git diff --cached --quiet || git commit -m "update to version $(V)") && git push
 	@cd bibliogenius-app && git add pubspec.yaml && (git diff --cached --quiet || git commit -m "update to version $(V)") && git push
-	@cd bibliogenius-hub && git add composer.json && (git diff --cached --quiet || git commit -m "update to version $(V)") && git push
-	@cd bibliogenius-website && git add _build/version.txt contribute.html en/contribute.html de/contribute.html es/contribute.html && (git diff --cached --quiet || git commit -m "update to version $(V)") && git push
 	@git add README.md && (git diff --cached --quiet || git commit -m "update to version $(V)") && git push
-	@echo "$(GREEN)✅ Version $(V) committed and pushed to all repos.$(RESET)"
+	@cd bibliogenius && if git rev-parse "v$(V)" >/dev/null 2>&1; then echo "  bibliogenius: tag v$(V) déjà présent, ignoré"; else git tag -a "v$(V)" -m "Release v$(V)" && git push origin "v$(V)"; fi
+	@cd bibliogenius-app && if git rev-parse "v$(V)" >/dev/null 2>&1; then echo "  bibliogenius-app: tag v$(V) déjà présent, ignoré"; else git tag -a "v$(V)" -m "Release v$(V)" && git push origin "v$(V)"; fi
+	@echo "$(GREEN)✅ Version $(V) committed, pushed and tagged (bibliogenius + bibliogenius-app).$(RESET)"
 
 show-version:
 	@echo "$(CYAN)📦 Current versions:$(RESET)"
@@ -110,6 +118,32 @@ show-version:
 	@echo "   Flutter: $$(grep '^version: ' bibliogenius-app/pubspec.yaml)"
 	@echo "   Hub:     $$(grep '\"version\"' bibliogenius-hub/composer.json 2>/dev/null || echo '(not set)')"
 	@echo "   README:  $$(grep '^\*\*Status\*\*' README.md)"
+
+# =============================================================================
+# SHIP — build & upload to the stores via fastlane
+# =============================================================================
+# fastlane runs without `bundle exec` (see Fastfile header). ~30 min for all 3.
+ship-ios:
+	@cd bibliogenius-app && fastlane ios upload
+
+ship-mac:
+	@cd bibliogenius-app && fastlane mac upload
+
+ship-android:
+	@cd bibliogenius-app && fastlane android upload
+
+# Builds & uploads all 3 platforms in series. Continues past a failing
+# platform, prints a summary, exits non-zero if any platform failed.
+ship:
+	@cd bibliogenius-app && { \
+	ios=KO; mac=KO; android=KO; \
+	echo "$(CYAN)=== iOS ===$(RESET)"; fastlane ios upload && ios=OK; \
+	echo "$(CYAN)=== macOS ===$(RESET)"; fastlane mac upload && mac=OK; \
+	echo "$(CYAN)=== Android ===$(RESET)"; fastlane android upload && android=OK; \
+	echo ""; echo "$(YELLOW)=== ship summary ===$(RESET)"; \
+	echo "  iOS:     $$ios"; echo "  macOS:   $$mac"; echo "  Android: $$android"; \
+	[ "$$ios" = OK ] && [ "$$mac" = OK ] && [ "$$android" = OK ]; \
+	}
 
 test:
 	@echo "$(CYAN)🧪 Running all tests...$(RESET)"
