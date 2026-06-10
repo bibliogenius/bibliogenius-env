@@ -43,6 +43,8 @@ docs/**/.DS_Store
 # ── Track: Docker environment ──
 !docker/
 !docker/**
+# but never heavy Linux build artifacts copied in for local smoke tests
+docker/*.tar.gz
 
 # ── Track: submodule definitions ──
 !.gitmodules

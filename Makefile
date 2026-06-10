@@ -1,4 +1,4 @@
-.PHONY: help setup install-all install-hub install-bundle install-rust start stop logs app app-chrome version version-app show-version release cargo-lock push-release ship ship-ios ship-mac ship-android
+.PHONY: help setup install-all install-hub install-bundle install-rust start stop logs app app-chrome version version-app show-version release cargo-lock push-release ship ship-ios ship-mac ship-android sideload-apk build-linux ship-linux
 
 # Colors
 YELLOW := \033[1;33m
@@ -38,7 +38,12 @@ help:
 	@echo "$(CYAN)🍎 Distribution:$(RESET)"
 	@echo "  $(GREEN)make backend        $(RESET): Build Rust backend (bundle-macos without Flutter build)"
 	@echo "  $(GREEN)make bundle-macos   $(RESET): Bundle Rust backend and build macOS app (Standalone)"
+	@echo "  $(GREEN)make sideload-apk   $(RESET): Build signed release APK + verify prod signature (one-off sideload)"
 	@echo "  $(GREEN)make test           $(RESET): Run all tests (Rust + Flutter)"
+	@echo ""
+	@echo "$(CYAN)🐧 Linux desktop (self-hosted, no store):$(RESET)"
+	@echo "  $(GREEN)make build-linux    $(RESET): Build BiblioGenius-Linux-x64.tar.gz from Mac via Docker (linux/amd64)"
+	@echo "  $(GREEN)make ship-linux     $(RESET): rsync the tarball to the VPS downloads/ (run manually after build)"
 	@echo ""
 	@echo "$(CYAN)🏷️  Versioning & Release:$(RESET)"
 	@echo "  $(GREEN)make release V=x.y.z$(RESET): Bump app version + Cargo.lock + commit + push + git tag"
@@ -183,6 +188,58 @@ bundle-macos:
 	cp bibliogenius-app/macos/Runner/Resources/backend/bibliogenius bibliogenius-app/build/macos/Build/Products/Release/app.app/Contents/Resources/backend/
 	chmod +x bibliogenius-app/build/macos/Build/Products/Release/app.app/Contents/Resources/backend/bibliogenius
 	@echo "✅ App bundled at bibliogenius-app/build/macos/Build/Products/Release/app.app"
+
+# Build a signed release APK for a one-off sideload, and verify it is signed
+# with the production key (guards against accidentally shipping a debug build).
+sideload-apk:
+	@echo "$(CYAN)📦 Building signed release APK...$(RESET)"
+	cd bibliogenius-app && flutter build apk --release
+	@APK="bibliogenius-app/build/app/outputs/flutter-apk/app-release.apk"; \
+	SDK="$${ANDROID_HOME:-$${ANDROID_SDK_ROOT:-$$HOME/Library/Android/sdk}}"; \
+	SIGNER=$$(ls "$$SDK"/build-tools/*/apksigner 2>/dev/null | sort -V | tail -1); \
+	echo "$(CYAN)🔏 Verifying signature...$(RESET)"; \
+	if [ -z "$$SIGNER" ]; then \
+		echo "$(YELLOW)⚠️  apksigner introuvable sous $$SDK/build-tools — vérif sautée$(RESET)"; \
+	else \
+		"$$SIGNER" verify --print-certs "$$APK" || exit 1; \
+	fi; \
+	echo "$(GREEN)✅ APK prêt: $$APK$(RESET)"
+
+# =============================================================================
+# LINUX DESKTOP — self-hosted distribution (no store, no fastlane)
+# =============================================================================
+# Reproducible Linux x64 build from the Mac via Docker (qemu emulation), then a
+# manual rsync to the VPS. One stable URL, one file, overwritten each release:
+#   https://bibliogenius.org/downloads/BiblioGenius-Linux-x64.tar.gz
+LINUX_BUILD_IMAGE := bibliogenius-linux-build:22.04
+LINUX_TARBALL     := BiblioGenius-Linux-x64.tar.gz
+DIST_DIR          := dist
+SHIP_HOST         ?= hub-vps
+SHIP_PATH         ?= /var/www/bibliogenius.org/downloads/
+
+# Build the toolchain image (cached) then compile inside it with both repos
+# bind-mounted as siblings. Slow on first run (qemu + Flutter precache).
+build-linux:
+	@echo "$(CYAN)🐧 Building Linux x64 toolchain image (linux/amd64)...$(RESET)"
+	docker buildx build --platform linux/amd64 --load \
+		-t $(LINUX_BUILD_IMAGE) -f docker/Dockerfile.linux-build docker
+	@mkdir -p $(DIST_DIR)
+	@echo "$(CYAN)🏗️  Compiling backend + Flutter Linux bundle...$(RESET)"
+	docker run --rm --platform linux/amd64 \
+		-v $(PWD)/bibliogenius:/src/bibliogenius \
+		-v $(PWD)/bibliogenius-app:/src/bibliogenius-app \
+		-v $(PWD)/$(DIST_DIR):/out \
+		$(LINUX_BUILD_IMAGE)
+	@echo "$(GREEN)✅ $(DIST_DIR)/$(LINUX_TARBALL)$(RESET)"
+
+# rsync WITHOUT --delete so the site's `make deploy` (which uses --delete) never
+# competes with it. Run manually — reuses your existing SSH access, no CI secret.
+ship-linux:
+	@test -f $(DIST_DIR)/$(LINUX_TARBALL) || { echo "$(YELLOW)⚠️  Run 'make build-linux' first$(RESET)"; exit 1; }
+	@echo "$(CYAN)🚀 Shipping $(LINUX_TARBALL) → $(SHIP_HOST):$(SHIP_PATH)$(RESET)"
+	rsync -avz --rsync-path="mkdir -p $(SHIP_PATH) && rsync" \
+		$(DIST_DIR)/$(LINUX_TARBALL) $(SHIP_HOST):$(SHIP_PATH)
+	@echo "$(GREEN)✅ https://bibliogenius.org/downloads/$(LINUX_TARBALL)$(RESET)"
 
 app:
 	@echo "Building and running Flutter macOS app..."
