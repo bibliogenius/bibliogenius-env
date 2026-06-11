@@ -63,7 +63,7 @@ Mac via Docker (émulation `linux/amd64` qemu, lent mais reproductible) et la
 distribution est auto-hébergée sur le VPS, derrière une URL stable.
 
 ```
-make build-linux    # produit dist/BiblioGenius-Linux-x64.tar.gz
+make build-linux    # produit dist/BiblioGenius-Linux-x64.AppImage (+ .sha256)
 make ship-linux      # rsync (SANS --delete) vers hub-vps:/var/www/bibliogenius.org/downloads/
 ```
 
@@ -71,23 +71,33 @@ make ship-linux      # rsync (SANS --delete) vers hub-vps:/var/www/bibliogenius.
   (Ubuntu 22.04 LTS, choisie pour la compat glibc), monte les deux repos
   (`bibliogenius` Rust + `bibliogenius-app` Flutter) en siblings, compile le
   backend Rust (`x86_64-unknown-linux-gnu`), lance `flutter build linux
-  --release`, injecte le binaire dans `bundle/backend/`, et produit le tarball.
-  Le premier run est long (qemu + `flutter precache`) ; l'image est ensuite en
-  cache.
-- `make ship-linux` dépose le tarball via rsync **sans** `--delete` (réutilise
-  ton accès SSH `hub-vps`, aucun secret en CI). Crée `downloads/` côté serveur
-  au besoin.
+  --release`, injecte le binaire dans `bundle/backend/`, puis emballe le bundle
+  dans une **AppImage** via `appimagetool` (un AppDir + AppRun + .desktop +
+  icône) et écrit le `.sha256` à côté. Le premier run est long (qemu +
+  `flutter precache`) ; l'image est ensuite en cache.
+- `make ship-linux` dépose l'AppImage et son `.sha256` via rsync **sans**
+  `--delete` (réutilise ton accès SSH `hub-vps`, aucun secret en CI). Crée
+  `downloads/` côté serveur au besoin.
 
-Politique de conservation : **un seul** fichier `BiblioGenius-Linux-x64.tar.gz`,
-écrasé à chaque release. URL stable, pas de rotation ni d'historique côté
-serveur. `downloads/` est dans le `.deployignore` du site, donc le `make deploy`
-du site (qui utilise `--delete`) n'efface jamais le binaire.
+Modèle de dépendances : l'AppImage **ne bundle pas** GTK/X11 ; elle s'appuie sur
+les libs système de l'hôte (d'où le build sur Ubuntu 22.04 pour la compat glibc).
+On utilise donc `appimagetool` sur un AppDir fait main, pas `linuxdeploy` (qui
+embarquerait les libs système et changerait l'empreinte).
 
-URL publique : https://bibliogenius.org/downloads/BiblioGenius-Linux-x64.tar.gz
-(liée depuis l'accueil et la page Contribuer, avec la version affichée).
+Politique de conservation : un seul fichier `BiblioGenius-Linux-x64.AppImage`,
+écrasé à chaque release. URL stable, pas de rotation ni d'historique côté serveur.
+`downloads/` est dans le `.deployignore` du site, donc le `make deploy` du site
+(qui utilise `--delete`) n'efface jamais le binaire.
 
-Pour valider le tarball sans machine Linux, voir `docker/README.md`
-(service `linux-app` + `verify_linux.sh`).
+URLs publiques :
+- https://bibliogenius.org/downloads/BiblioGenius-Linux-x64.AppImage
+- https://bibliogenius.org/downloads/BiblioGenius-Linux-x64.AppImage.sha256
+
+Liée depuis l'accueil et la page Contribuer du site (`bibliogenius-website/`,
+liens FR/EN/ES/DE + templates).
+
+Pour valider l'AppImage sans machine Linux, voir `docker/README.md`
+(service `linux-appimage` + `verify_linux.sh`).
 
 Windows reste non couvert (cross-compilation impossible depuis le Mac) — voir la
 note dans le Makefile et la mémoire projet dédiée.

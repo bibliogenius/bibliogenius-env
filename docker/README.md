@@ -10,6 +10,7 @@ Docker Compose services for development, testing, and local infrastructure.
 | `hub` | Symfony hub (registry, discovery, relay) | 8081 |
 | `builder` | Rust dependency cache builder | — |
 | `linux-app` | Flutter Linux bundle (headless, API, or VNC) | 8042, 6080 |
+| `linux-appimage` | Packaged AppImage from `dist/` (headless, API, or VNC) | 8043, 6081 |
 
 ## Quick start
 
@@ -67,6 +68,28 @@ docker compose run --rm --service-ports linux-app vnc
 ```
 
 Then open http://localhost:6080/vnc.html in your browser. Click "Connect" to see the Linux desktop with the app running.
+
+## Testing the AppImage
+
+`make build-linux` (from the repo root) produces `dist/BiblioGenius-Linux-x64.AppImage`. The `linux-appimage` service runs that exact file the way a user would, inside a clean Ubuntu container with no dev dependencies. Docker has no FUSE, so the entrypoint runs the AppImage with `APPIMAGE_EXTRACT_AND_RUN=1` (this still exercises the real type-2 runtime and the bundled `AppRun`).
+
+```bash
+# Build the AppImage first (repo root)
+make build-linux
+
+# Smoke test (headless): launches, waits 5s, exits 0 if still running
+docker compose run --rm linux-appimage smoke
+
+# API verification on port 8043
+docker compose run --rm -d --service-ports linux-appimage
+./verify_linux.sh 8043
+docker compose stop
+
+# GUI (VNC) on http://localhost:6081/vnc.html
+docker compose run --rm --service-ports linux-appimage vnc
+```
+
+A passing `verify_linux.sh` confirms both that the app starts AND that the embedded Rust backend (the FFI HTTP server) answers on `/api/health`.
 
 ### Notes
 

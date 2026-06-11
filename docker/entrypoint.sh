@@ -3,14 +3,56 @@ set -e
 
 MODE="${1:-serve}"
 
-# Check that the bundle is present
-if [ ! -f /app/app ]; then
-  echo "❌ Linux bundle not found at /app/"
+# Resolve what to launch. Two layouts are supported:
+#   1. Extracted Flutter bundle: /app/app + lib/ + data/ (legacy bundle test).
+#   2. A packaged AppImage mounted under /app (e.g. the dist/ dir).
+#
+# For the AppImage we prefer native execution (APPIMAGE_EXTRACT_AND_RUN avoids
+# the FUSE requirement). On a real x86_64 Linux host that just works. Under
+# Docker's amd64 emulation on Apple Silicon, the static-pie type-2 runtime cannot
+# be exec'd ("Exec format error"), so we fall back to extracting the AppImage's
+# squashfs payload with unsquashfs and running its AppRun directly. Both paths run
+# the bytes from the actual shipped .AppImage.
+if [ -f /app/app ]; then
+  APP_TARGET=/app/app
+else
+  APPIMAGE="$(ls /app/*.AppImage 2>/dev/null | head -n1 || true)"
+  if [ -n "$APPIMAGE" ]; then
+    chmod +x "$APPIMAGE" 2>/dev/null || true
+    export TMPDIR=/tmp
+    if APPIMAGE_EXTRACT_AND_RUN=1 "$APPIMAGE" --appimage-offset >/dev/null 2>&1; then
+      echo "ℹ️  Launching AppImage natively: $APPIMAGE (extract-and-run, no FUSE)"
+      export APPIMAGE_EXTRACT_AND_RUN=1
+      APP_TARGET="$APPIMAGE"
+    else
+      echo "ℹ️  Native AppImage exec unavailable (emulation); extracting payload..."
+      # The squashfs payload begins right after the runtime ELF, i.e. at the end
+      # of its section-header table. Compute that from the 64-bit ELF header
+      # (e_shoff @0x28 8B, e_shentsize @0x3A 2B, e_shnum @0x3C 2B, all LE) exactly
+      # as `--appimage-offset` does. A plain "hsqs" magic search is NOT safe: the
+      # bytes appear inside the runtime ELF too, before the real payload.
+      le() { off=0 mul=1; for b in $(od -An -tu1 -j "$2" -N "$3" "$1"); do off=$((off+b*mul)); mul=$((mul*256)); done; echo "$off"; }
+      shoff=$(le "$APPIMAGE" 40 8)
+      ent=$(le "$APPIMAGE" 58 2)
+      num=$(le "$APPIMAGE" 60 2)
+      OFFSET=$((shoff + ent*num))
+      if [ "$(dd if="$APPIMAGE" bs=1 skip="$OFFSET" count=4 2>/dev/null)" != "hsqs" ]; then
+        echo "❌ Computed payload offset $OFFSET is not a squashfs superblock"
+        exit 1
+      fi
+      rm -rf /tmp/appimage-root
+      unsquashfs -f -d /tmp/appimage-root -o "$OFFSET" "$APPIMAGE" >/dev/null
+      APP_TARGET=/tmp/appimage-root/AppRun
+      echo "ℹ️  Extracted to /tmp/appimage-root (offset $OFFSET)"
+    fi
+  fi
+fi
+
+if [ -z "${APP_TARGET:-}" ] || { [ "$APP_TARGET" != "/app/app" ] && [ ! -f "$APP_TARGET" ]; }; then
+  echo "❌ Neither a Flutter bundle (/app/app) nor an *.AppImage found in /app/"
   echo ""
-  echo "Download it first:"
-  echo "  cd docker && ./download-linux-bundle.sh"
-  echo ""
-  echo "Or manually place a Flutter Linux bundle in _ressources/bundle/"
+  echo "Download a bundle:    cd docker && ./download-linux-bundle.sh"
+  echo "Or mount dist/ (with BiblioGenius-Linux-x64.AppImage) at /app."
   exit 1
 fi
 
@@ -36,7 +78,7 @@ run_app() {
 case "$MODE" in
   smoke)
     echo "Mode: smoke test"
-    run_app /app/app 2>&1 &
+    run_app "$APP_TARGET" 2>&1 &
     APP_PID=$!
     sleep 5
     if kill -0 $APP_PID 2>/dev/null; then
@@ -66,13 +108,13 @@ case "$MODE" in
     echo "✅ VNC ready — open http://localhost:6080/vnc.html"
     echo "Starting BiblioGenius..."
 
-    run_app /app/app 2>&1 &
+    run_app "$APP_TARGET" 2>&1 &
     wait
     ;;
 
   *)
     echo "Mode: serve (backend available on exposed port)"
-    run_app /app/app 2>&1 &
+    run_app "$APP_TARGET" 2>&1 &
     wait
     ;;
 esac

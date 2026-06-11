@@ -24,6 +24,9 @@ RUN apt-get update && apt-get install -y \
     libxrandr2 \
     libxrender1 \
     libxtst6 \
+    # AppImage payload extraction fallback (unsquashfs) when the static-pie
+    # runtime cannot be exec'd under amd64 emulation
+    squashfs-tools \
     # Virtual display for headless mode
     xvfb \
     # VNC server + lightweight window manager

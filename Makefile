@@ -42,8 +42,8 @@ help:
 	@echo "  $(GREEN)make test           $(RESET): Run all tests (Rust + Flutter)"
 	@echo ""
 	@echo "$(CYAN)🐧 Linux desktop (self-hosted, no store):$(RESET)"
-	@echo "  $(GREEN)make build-linux    $(RESET): Build BiblioGenius-Linux-x64.tar.gz from Mac via Docker (linux/amd64)"
-	@echo "  $(GREEN)make ship-linux     $(RESET): rsync the tarball to the VPS downloads/ (run manually after build)"
+	@echo "  $(GREEN)make build-linux    $(RESET): Build BiblioGenius-Linux-x64.AppImage from Mac via Docker (linux/amd64)"
+	@echo "  $(GREEN)make ship-linux     $(RESET): rsync the AppImage + SHA256 to the VPS downloads/ (run manually after build)"
 	@echo ""
 	@echo "$(CYAN)🏷️  Versioning & Release:$(RESET)"
 	@echo "  $(GREEN)make release V=x.y.z$(RESET): Bump app version + Cargo.lock + commit + push + git tag"
@@ -209,10 +209,11 @@ sideload-apk:
 # LINUX DESKTOP — self-hosted distribution (no store, no fastlane)
 # =============================================================================
 # Reproducible Linux x64 build from the Mac via Docker (qemu emulation), then a
-# manual rsync to the VPS. One stable URL, one file, overwritten each release:
-#   https://bibliogenius.org/downloads/BiblioGenius-Linux-x64.tar.gz
+# manual rsync to the VPS. Stable URLs, overwritten each release:
+#   https://bibliogenius.org/downloads/BiblioGenius-Linux-x64.AppImage
+#   https://bibliogenius.org/downloads/BiblioGenius-Linux-x64.AppImage.sha256
 LINUX_BUILD_IMAGE := bibliogenius-linux-build:22.04
-LINUX_TARBALL     := BiblioGenius-Linux-x64.tar.gz
+LINUX_APPIMAGE    := BiblioGenius-Linux-x64.AppImage
 DIST_DIR          := dist
 SHIP_HOST         ?= hub-vps
 SHIP_PATH         ?= /var/www/bibliogenius.org/downloads/
@@ -230,16 +231,18 @@ build-linux:
 		-v $(PWD)/bibliogenius-app:/src/bibliogenius-app \
 		-v $(PWD)/$(DIST_DIR):/out \
 		$(LINUX_BUILD_IMAGE)
-	@echo "$(GREEN)✅ $(DIST_DIR)/$(LINUX_TARBALL)$(RESET)"
+	@echo "$(GREEN)✅ $(DIST_DIR)/$(LINUX_APPIMAGE) (+ .sha256)$(RESET)"
 
 # rsync WITHOUT --delete so the site's `make deploy` (which uses --delete) never
 # competes with it. Run manually — reuses your existing SSH access, no CI secret.
+# Ships the AppImage + its SHA256 sidecar.
 ship-linux:
-	@test -f $(DIST_DIR)/$(LINUX_TARBALL) || { echo "$(YELLOW)⚠️  Run 'make build-linux' first$(RESET)"; exit 1; }
-	@echo "$(CYAN)🚀 Shipping $(LINUX_TARBALL) → $(SHIP_HOST):$(SHIP_PATH)$(RESET)"
+	@test -f $(DIST_DIR)/$(LINUX_APPIMAGE) || { echo "$(YELLOW)⚠️  Run 'make build-linux' first$(RESET)"; exit 1; }
+	@echo "$(CYAN)🚀 Shipping $(LINUX_APPIMAGE) → $(SHIP_HOST):$(SHIP_PATH)$(RESET)"
 	rsync -avz --rsync-path="mkdir -p $(SHIP_PATH) && rsync" \
-		$(DIST_DIR)/$(LINUX_TARBALL) $(SHIP_HOST):$(SHIP_PATH)
-	@echo "$(GREEN)✅ https://bibliogenius.org/downloads/$(LINUX_TARBALL)$(RESET)"
+		$(DIST_DIR)/$(LINUX_APPIMAGE) $(DIST_DIR)/$(LINUX_APPIMAGE).sha256 \
+		$(SHIP_HOST):$(SHIP_PATH)
+	@echo "$(GREEN)✅ https://bibliogenius.org/downloads/$(LINUX_APPIMAGE)$(RESET)"
 
 app:
 	@echo "Building and running Flutter macOS app..."

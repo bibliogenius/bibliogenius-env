@@ -40,9 +40,6 @@ ARG FLUTTER_VERSION=3.38.4
 RUN git clone --depth 1 --branch ${FLUTTER_VERSION} \
       https://github.com/flutter/flutter.git /opt/flutter
 
-COPY build-linux.sh /usr/local/bin/build-linux.sh
-RUN chmod +x /usr/local/bin/build-linux.sh
-
 RUN git config --global --add safe.directory '*' \
     && flutter config --no-analytics --enable-linux-desktop \
     && flutter precache --linux
@@ -56,6 +53,32 @@ RUN git config --global --add safe.directory '*' \
 RUN apt-get update && apt-get install -y --no-install-recommends build-essential \
     && rm -rf /var/lib/apt/lists/*
 ENV OPENSSL_NO_VENDOR=1
+
+# AppImage packaging toolchain. A type-2 AppImage is just the type-2 runtime ELF
+# with a squashfs filesystem concatenated after it. We assemble it by hand
+# (mksquashfs + cat runtime) instead of running `appimagetool`, because executing
+# any AppImage at build time fails: appimagetool ships as a static-pie ELF and
+# Docker's amd64 emulation on Apple Silicon refuses to exec static-pie binaries
+# ("Exec format error"). Assembling the file by hand never execs one, so the
+# build is robust under emulation. See build-linux.sh for the packaging steps.
+#   - squashfs-tools: mksquashfs (build the payload) + unsquashfs (self-check).
+#   - desktop-file-utils: desktop-file-validate, run on the bundled .desktop.
+# Only the runtime is fetched (from GitHub, consistent with the Flutter/rustup
+# fetches above; the "no GitHub" rule is about the release/hosting pipeline, not
+# build tooling). It is the prefix prepended to OUR AppImage, so packaging needs
+# no network access.
+ARG APPIMAGE_RUNTIME_URL=https://github.com/AppImage/type2-runtime/releases/download/continuous/runtime-x86_64
+RUN apt-get update && apt-get install -y --no-install-recommends \
+        squashfs-tools desktop-file-utils \
+    && rm -rf /var/lib/apt/lists/* \
+    && curl -fsSL -o /opt/appimage-runtime "$APPIMAGE_RUNTIME_URL" \
+    && chmod +x /opt/appimage-runtime
+
+# The build script is COPYed LAST so iterating on it only re-runs this tiny layer
+# (the expensive flutter precache + toolchain layers above stay cached). It is
+# invoked via ENTRYPOINT at run time, so its position has no runtime effect.
+COPY build-linux.sh /usr/local/bin/build-linux.sh
+RUN chmod +x /usr/local/bin/build-linux.sh
 
 # Repos are bind-mounted at run time under /src (siblings, as in local dev):
 #   /src/bibliogenius      (Rust)
