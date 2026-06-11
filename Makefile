@@ -1,4 +1,4 @@
-.PHONY: help setup install-all install-hub install-bundle install-rust start stop logs app app-chrome version version-app show-version release cargo-lock push-release ship ship-ios ship-mac ship-android sideload-apk build-linux ship-linux
+.PHONY: help setup install-all install-hub install-bundle install-rust start stop logs app app-chrome version version-app show-version release cargo-lock push-release ship ship-ios ship-mac ship-android sideload-apk build-linux ship-linux ship-windows
 
 # Colors
 YELLOW := \033[1;33m
@@ -44,6 +44,7 @@ help:
 	@echo "$(CYAN)🐧 Linux desktop (self-hosted, no store):$(RESET)"
 	@echo "  $(GREEN)make build-linux    $(RESET): Build BiblioGenius-Linux-x64.AppImage from Mac via Docker (linux/amd64)"
 	@echo "  $(GREEN)make ship-linux     $(RESET): rsync the AppImage + SHA256 to the VPS downloads/ (run manually after build)"
+	@echo "  $(GREEN)make ship-windows   $(RESET): rsync BiblioGenius-Setup.exe (from GitHub artifact, placed in dist/) + SHA256 to the VPS"
 	@echo ""
 	@echo "$(CYAN)🏷️  Versioning & Release:$(RESET)"
 	@echo "  $(GREEN)make release V=x.y.z$(RESET): Bump app version + Cargo.lock + commit + push + git tag"
@@ -214,6 +215,7 @@ sideload-apk:
 #   https://bibliogenius.org/downloads/BiblioGenius-Linux-x64.AppImage.sha256
 LINUX_BUILD_IMAGE := bibliogenius-linux-build:22.04
 LINUX_APPIMAGE    := BiblioGenius-Linux-x64.AppImage
+WINDOWS_INSTALLER := BiblioGenius-Setup.exe
 DIST_DIR          := dist
 SHIP_HOST         ?= hub-vps
 SHIP_PATH         ?= /var/www/bibliogenius.org/downloads/
@@ -243,6 +245,19 @@ ship-linux:
 		$(DIST_DIR)/$(LINUX_APPIMAGE) $(DIST_DIR)/$(LINUX_APPIMAGE).sha256 \
 		$(SHIP_HOST):$(SHIP_PATH)
 	@echo "$(GREEN)✅ https://bibliogenius.org/downloads/$(LINUX_APPIMAGE)$(RESET)"
+
+# Ship the Windows installer. Unlike Linux, the .exe is built on GitHub Actions
+# (no cross-compile from Mac): download the `bibliogenius-windows` run artifact,
+# unzip it, drop BiblioGenius-Setup.exe into dist/, then run this. The SHA256 is
+# generated here since the file comes from outside the build pipeline.
+ship-windows:
+	@test -f $(DIST_DIR)/$(WINDOWS_INSTALLER) || { echo "$(YELLOW)⚠️  Place $(WINDOWS_INSTALLER) in $(DIST_DIR)/ first (from the GitHub Actions artifact)$(RESET)"; exit 1; }
+	@cd $(DIST_DIR) && shasum -a 256 $(WINDOWS_INSTALLER) > $(WINDOWS_INSTALLER).sha256
+	@echo "$(CYAN)🚀 Shipping $(WINDOWS_INSTALLER) → $(SHIP_HOST):$(SHIP_PATH)$(RESET)"
+	rsync -avz --rsync-path="mkdir -p $(SHIP_PATH) && rsync" \
+		$(DIST_DIR)/$(WINDOWS_INSTALLER) $(DIST_DIR)/$(WINDOWS_INSTALLER).sha256 \
+		$(SHIP_HOST):$(SHIP_PATH)
+	@echo "$(GREEN)✅ https://bibliogenius.org/downloads/$(WINDOWS_INSTALLER)$(RESET)"
 
 app:
 	@echo "Building and running Flutter macOS app..."
