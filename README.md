@@ -1,5 +1,7 @@
 # BiblioGenius Ecosystem
 
+> **Canonical repository: [Codeberg](https://codeberg.org/bibliogenius/bibliogenius-env).** The GitHub copy is a read-only mirror, automatically synced from Codeberg. Please open issues and pull requests on Codeberg.
+
 A decentralized, cross-platform library management system.
 
 🌐 **Website:** [bibliogenius.org](https://bibliogenius.org)
