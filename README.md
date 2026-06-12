@@ -2,75 +2,63 @@
 
 > **Canonical repository: [Codeberg](https://codeberg.org/bibliogenius/bibliogenius-env).** The GitHub copy is a read-only mirror, automatically synced from Codeberg. Please open issues and pull requests on Codeberg.
 
-A decentralized, cross-platform library management system.
+A decentralized, local-first library management system: catalog your books, lend them to friends, and keep every device in sync, without surrendering your data to anyone.
 
 🌐 **Website:** [bibliogenius.org](https://bibliogenius.org)
 
+## 📱 Where to get it
+
+BiblioGenius ships and is tested daily on **iOS, Android, and macOS**, the platforms we recommend today.
+Desktop builds for **Windows and Linux** are available and still stabilizing.
+
+> This repository is the **development environment** for the whole ecosystem. If you just want to use the app, head to [bibliogenius.org](https://bibliogenius.org). If you want to build or contribute, read on.
+
 ## ✨ Features
 
-- **📚 Catalog Management**: Add books via ISBN scan (OpenLibrary/Goodreads), manage copies, and track loans.
-- **🤝 P2P Sharing**: Connect directly with friends' libraries via QR code to borrow books.
-- **🔐 End-to-End Encryption**: Share your library globally via encrypted relay — the server never sees your data.
-- **🤖 MCP Integration**: "Speak with your library" using local AI agents via Model Context Protocol.
+- **📚 Catalog Management**: Add books via ISBN scan (BNF, Inventaire, OpenLibrary, Google Books), manage copies, and track loans.
+- **🤝 P2P Sharing**: Connect with friends' libraries, locally over your Wi-Fi network (zero-config mDNS discovery) or across the web, to browse and borrow.
+- **🔐 End-to-End Encryption**: Stay in sync and reachable from anywhere through an encrypted relay. The hub only ever sees ciphertext.
 - **🏆 Gamification**: Earn reputation ("Lender", "Archivist") and level up your librarian status.
-- **🛡️ Backup & Export**: Full JSON export of your library data for safekeeping.
-- **🚀 Cross-Platform**: Native performance on iOS, Android, macOS, Windows, and Linux.
-- **🔒 Digital Sovereignty**: Local-First architecture. You own your data. No central server required.
-
-> 🇪🇺 **Proudly supported by [NLnet](https://nlnet.nl/)** through the NGI Zero Commons Fund.
+- **🛡️ Backup & Export**: Full JSON export of your library for safekeeping.
+- **🔒 Digital Sovereignty**: Local-first architecture. You own your data. No central server required.
+- **🤖 MCP Integration**: "Speak with your library" using local AI agents via the Model Context Protocol.
 
 ## 📦 Components
 
-This is the **environment repo** that orchestrates all BiblioGenius components. Run `python3 setup.py <profile>` to clone what you need.
+Each component lives in its own repository. This **environment repo** orchestrates them: run `make setup P=<profile>` to clone and configure exactly what you need.
 
-### [`bibliogenius/`](./bibliogenius)
+### [`bibliogenius/`](./bibliogenius) - Rust Server
 
-**Rust Server** - Autonomous library server with REST API  
-🔗 Repository: <https://codeberg.org/bibliogenius/bibliogenius>
+The core backend. Runs **embedded** inside the app (via FFI) for offline-first performance, or **standalone** as an HTTP server for headless and self-hosted setups. Owns the SQLite database, P2P sync, and external metadata lookups.
+🔗 <https://codeberg.org/bibliogenius/bibliogenius>
 
-### [`bibliogenius-app/`](./bibliogenius-app)
+### [`bibliogenius-app/`](./bibliogenius-app) - Flutter App
 
-**Flutter Apps** - Mobile and desktop applications  
-🔗 Repository: <https://codeberg.org/bibliogenius/bibliogenius-app>
+The user-facing app for iOS, Android, and macOS (with Windows and Linux desktop builds). Embeds the Rust server and adds the scanner, catalog UI, multi-device sync, and peer lending.
+🔗 <https://codeberg.org/bibliogenius/bibliogenius-app>
 
-### [`bibliogenius-hub/`](./bibliogenius-hub)
+### [`bibliogenius-hub/`](./bibliogenius-hub) - Symfony Hub
 
-**Symfony Hub** - Optional central directory service  
-🔗 Repository: <https://codeberg.org/bibliogenius/bibliogenius-hub>
+An **optional** service you only need when devices are off the same network. It provides a public directory and a zero-knowledge relay: blind, store-and-forward encrypted mailboxes. It never sees your library data.
+🔗 <https://codeberg.org/bibliogenius/bibliogenius-hub>
 
-## 📚 Documentation
-
-- [NO_CODE_ONBOARDING.md](./docs/NO_CODE_ONBOARDING.md) - Guide for non-technical contributors
-- [CONFLUENCE_STRUCTURE.md](./docs/CONFLUENCE_STRUCTURE.md) - Confluence space organization
-- [CLAUDE.md](./CLAUDE.md) - Architecture rules and AI assistant guidelines
-
-## 🚀 Quick Start
-
-### For Users
-
-Get the app from [bibliogenius.org](https://bibliogenius.org) or your favorite app store after 1.0 release (coming soon) — available on iOS, Android, macOS, Windows, and Linux.
-
-### For Developers
+## 🚀 Quick Start (developers)
 
 ```bash
 # Clone the environment repo
 git clone https://codeberg.org/bibliogenius/bibliogenius-env.git
 cd bibliogenius-env
 
-# Setup for your profile (no-code / junior / senior)
+# Set up for your profile (no-code / junior / senior)
 make setup P=junior
 
-# To switch profile later, just re-run with the new profile:
+# To switch profile later, just re-run with the new one:
 make setup P=senior
-
-# Then follow the on-screen instructions
 ```
 
-> **Note**: The setup script clones the right repos, configures your AI tools (Claude Code / Cursor), and guides you through the next steps. Re-running with a different profile upgrades your environment (clones missing repos, adjusts hooks).
->
-> Alternative: `python3 setup.py junior`
+The setup script clones the right repos, configures your AI tools (Claude Code / Cursor), and guides you through the next steps. Re-running with a different profile upgrades your environment (clones missing repos, adjusts hooks).
 
-See [NO_CODE_ONBOARDING.md](./docs/NO_CODE_ONBOARDING.md) for the non-technical contributor guide.
+Alternative entry point: `python3 setup.py junior`. Non-technical contributors should start with [NO_CODE_ONBOARDING.md](./docs/NO_CODE_ONBOARDING.md).
 
 ## 🏗️ Architecture
 
@@ -88,18 +76,23 @@ graph TD
     RustB -- "FFI" --> FlutterB["Flutter App B"]
 ```
 
+## 📚 Documentation
+
+- [NO_CODE_ONBOARDING.md](./docs/NO_CODE_ONBOARDING.md) - Guide for non-technical contributors
+- [CLAUDE.md](./CLAUDE.md) - Architecture rules and AI assistant guidelines
+
 ## 🤝 Contributing
 
-Each component has its own repository. Please contribute to the appropriate repo:
+Contribute to the repository that matches your change (issues and PRs on **Codeberg**):
 
-- Rust server issues/PRs → [`bibliogenius`](https://codeberg.org/bibliogenius/bibliogenius)
-- Flutter app issues/PRs → [`bibliogenius-app`](https://codeberg.org/bibliogenius/bibliogenius-app)
-- Symfony hub issues/PRs → [`bibliogenius-hub`](https://codeberg.org/bibliogenius/bibliogenius-hub)
+- Rust server → [`bibliogenius`](https://codeberg.org/bibliogenius/bibliogenius)
+- Flutter app → [`bibliogenius-app`](https://codeberg.org/bibliogenius/bibliogenius-app)
+- Symfony hub → [`bibliogenius-hub`](https://codeberg.org/bibliogenius/bibliogenius-hub)
 - Environment / onboarding → [`bibliogenius-env`](https://codeberg.org/bibliogenius/bibliogenius-env) (this repo)
 
 ## 📄 License
 
-AGPL-3.0-or-later - see LICENSE file in each repository
+AGPL-3.0-or-later - see the LICENSE file in each repository.
 
 ## 👤 Author
 
@@ -111,5 +104,4 @@ AGPL-3.0-or-later - see LICENSE file in each repository
 
 ---
 
-**Status**: In Development (Pre-release)
-**Last Updated**: 2026-02-16
+**Status**: Pre-release (1.0 approaching) · **Last updated**: 2026-06-12
