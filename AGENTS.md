@@ -11,6 +11,8 @@ These principles apply to ALL development work, without exception. Read them bef
 ### 1. Write clean, readable code
 Follow established conventions (see instruction files below). Favor clarity over cleverness. Keep functions short, names descriptive, and responsibilities well-separated.
 
+**Code is written in English.** All comments, identifiers (variables, functions, types), log messages, and commit messages must be in English, even when the work targets a French UI. The only exception is user-facing strings, which live in the i18n catalogues (`.po` files) and use the target language there. Never leave French (or any non-English) in comments or names — e.g. write "summary", not "bilan".
+
 ### 2. When in doubt, ask
 If a requirement is ambiguous, an architecture decision is unclear, or you are unsure about the impact of a change, **stop and ask the user before proceeding**. A clarifying question is always cheaper than a wrong implementation.
 
