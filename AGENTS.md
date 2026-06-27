@@ -13,6 +13,8 @@ Follow established conventions (see instruction files below). Favor clarity over
 
 **Code is written in English.** All comments, identifiers (variables, functions, types), log messages, and commit messages must be in English, even when the work targets a French UI. The only exception is user-facing strings, which live in the i18n catalogues (`.po` files) and use the target language there. Never leave French (or any non-English) in comments or names — e.g. write "summary", not "bilan".
 
+**Do NOT reference private-repo tickets in code.** The code repositories are public (mirrored to Codeberg); `bibliogenius-docs` is private. Never put private ticket or work-stream identifiers — `ST-NN`, `TICKET-*`, `WS-N`, or similar epic/phase codes — in code, comments, log messages, or commit messages: they dangle to content a reader cannot access. State the *reason* instead (the behaviour, constraint, or decision), not the ticket number. **Exception: `ADR-NNN` references ARE allowed and encouraged** — Architecture Decision Records are the established cross-reference convention throughout the codebase (see the ADR section below).
+
 ### 2. When in doubt, ask
 If a requirement is ambiguous, an architecture decision is unclear, or you are unsure about the impact of a change, **stop and ask the user before proceeding**. A clarifying question is always cheaper than a wrong implementation.
 
