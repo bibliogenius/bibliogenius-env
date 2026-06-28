@@ -102,8 +102,13 @@ Specialized agent skills in `.agents/skills/`:
 cd bibliogenius && cargo fmt && cargo clippy -- -D warnings && cargo test
 
 # Flutter
-cd bibliogenius-app && flutter analyze lib/
+cd bibliogenius-app && flutter analyze lib/ && flutter test
 ```
+
+> `flutter analyze lib/` only scans `lib/` — it does NOT see test compile errors.
+> After any model field, repository signature, or FFI surface change, run
+> `flutter test` (or `flutter analyze` on the whole project) to catch broken
+> tests, exactly as the Rust check runs `cargo test`.
 
 ---
 

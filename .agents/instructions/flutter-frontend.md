@@ -591,6 +591,14 @@ flutter analyze lib/
 
 Must pass before considering work complete.
 
+**After model field / repository signature / FFI surface changes, also run the
+tests** — `flutter analyze lib/` scans only `lib/` and will NOT report broken
+test code:
+
+```bash
+flutter test          # or: flutter analyze   (whole project, includes test/)
+```
+
 ---
 
 ## Known Technical Debt
