@@ -29,6 +29,8 @@
 .claude/commands/local/
 .claude/skills/local/
 .claude/.DS_Store
+# Exclude runtime artifacts (scheduled-task lock)
+.claude/scheduled_tasks.lock
 
 # ── Track: shared skills source ──
 !.agents/
