@@ -610,7 +610,7 @@ flutter test          # or: flutter analyze   (whole project, includes test/)
 3. **Missing debounce**: Search/filter operations lack debouncing in some screens
 4. **Edit deep linking broken**: EditBookScreen throws if navigated directly
 5. **Unbounded audio cache**: `AudioProvider._audioCache` can grow indefinitely
-6. **Partial i18n**: IT/TR/BG `.po` files are ~70% translated. EN/FR/ES/DE are at 100%. See `dart tools/validate_po.dart`
+6. **Stale i18n template**: all 8 UI-exposed languages (EN/FR/ES/DE/IT/PT-BR/TR/BG) are at 100% key parity with `fr.po` (2026-07-02), but `messages.pot` lags ~500 keys behind the catalogues and `dart tools/validate_po.dart` only checks EN/FR/ES/DE/IT against it — regenerate the template and widen the checked-language list to make the validator authoritative again
 7. **ApiService bloat**: 3,700+ lines with mixed concerns (FFI routing, retry, health check)
 8. **HTTP local legacy**: Collections and gamification use `_getLocalDio()` detour instead of FFI direct. New features MUST use `FfiService` -> `frb.*` (see architecture.md Rule F3)
 
