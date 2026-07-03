@@ -43,6 +43,14 @@ Une seule plateforme : `make ship-ios`, `make ship-mac`, `make ship-android`.
 `make ship` continue même si une plateforme échoue (résumé final), et sort en
 erreur si au moins une a échoué. Compter ~30 min pour les 3 en série.
 
+Chaque cible `ship*` exécute d'abord `make check-migration` : rejeu de la chaîne
+complète de migrations DB sur une **copie** d'une vraie bibliothèque à l'ancien
+schéma (`bibliogenius.db` à la racine par défaut, surchargeable via
+`REAL_DB=/chemin/vers/base.db`). Une migration qui passe sur une base de dev
+propre peut briquer un vrai device (incident 1.1.0-beta : `foreign_key_check`
+avortait sur les lignes sentinelles `peer_id = 0` du cache annuaire) — ce
+garde-fou bloque l'upload avant. Le fichier source n'est jamais modifié.
+
 Note macOS : `make ship-mac` rebuild le backend Rust (~3-5 min). Pour réutiliser
 un build Rust existant : `cd bibliogenius-app && fastlane mac upload skip_rust:true`.
 

@@ -1,4 +1,4 @@
-.PHONY: help setup install-all install-hub install-bundle install-rust start stop logs app app-chrome version version-app show-version release cargo-lock push-release ship ship-ios ship-mac ship-android sideload-apk build-linux ship-linux ship-windows
+.PHONY: help setup install-all install-hub install-bundle install-rust start stop logs app app-chrome version version-app show-version release cargo-lock push-release check-migration ship ship-ios ship-mac ship-android sideload-apk build-linux ship-linux ship-windows
 
 # Colors
 YELLOW := \033[1;33m
@@ -52,6 +52,7 @@ help:
 	@echo "  $(GREEN)make show-version   $(RESET): Show current version across all components"
 	@echo ""
 	@echo "$(CYAN)🚢 Ship to stores (fastlane):$(RESET)"
+	@echo "  $(GREEN)make check-migration$(RESET): Replay all DB migrations on a copy of a real library (auto-runs before ship*)"
 	@echo "  $(GREEN)make ship           $(RESET): Build & upload iOS + macOS + Android"
 	@echo "  $(GREEN)make ship-ios       $(RESET): Build & upload iOS only"
 	@echo "  $(GREEN)make ship-mac       $(RESET): Build & upload macOS only"
@@ -129,18 +130,33 @@ show-version:
 # SHIP — build & upload to the stores via fastlane
 # =============================================================================
 # fastlane runs without `bundle exec` (see Fastfile header). ~30 min for all 3.
-ship-ios:
+
+# Pre-ship gate: replay the FULL migration chain on a copy of a real old-schema
+# library. Migrations that pass on clean dev databases can still brick real
+# devices — 1.1.0-beta failed `foreign_key_check` on the by-design
+# `peer_books.peer_id = 0` directory-cache sentinels and made init fail on
+# every launch. The test only copies the source file, never writes to it.
+# Override the source with REAL_DB=/path/to/old-library.db.
+REAL_DB ?= $(PWD)/bibliogenius.db
+
+check-migration:
+	@echo "$(CYAN)🧬 Replaying migrations on a real library copy ($(REAL_DB))...$(RESET)"
+	@test -f "$(REAL_DB)" || { echo "$(YELLOW)REAL_DB not found: $(REAL_DB) — point REAL_DB at an old-schema library file$(RESET)"; exit 1; }
+	@cd bibliogenius && WS2_REAL_DB="$(REAL_DB)" cargo test --test uuid_pk_migration_prototype real_library_copy -- --nocapture
+	@echo "$(GREEN)✅ Real-library migration replay passed.$(RESET)"
+
+ship-ios: check-migration
 	@cd bibliogenius-app && fastlane ios upload
 
-ship-mac:
+ship-mac: check-migration
 	@cd bibliogenius-app && fastlane mac upload
 
-ship-android:
+ship-android: check-migration
 	@cd bibliogenius-app && fastlane android upload
 
 # Builds & uploads all 3 platforms in series. Continues past a failing
 # platform, prints a summary, exits non-zero if any platform failed.
-ship:
+ship: check-migration
 	@cd bibliogenius-app && { \
 	ios=KO; mac=KO; android=KO; \
 	echo "$(CYAN)=== iOS ===$(RESET)"; fastlane ios upload && ios=OK; \
