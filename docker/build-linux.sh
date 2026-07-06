@@ -14,7 +14,12 @@ APPIMAGE=/out/BiblioGenius-Linux-x64.AppImage
 ICON_SRC="$APP_SRC/macos/Runner/Assets.xcassets/AppIcon.appiconset/app_icon_512.png"
 
 echo "==> Building Rust backend ($TARGET)..."
+# account_sync + static cr-sqlite must match the FFI app build (same rule as
+# the macOS Fastfile lane): the bundled backend shares the app database, and
+# once a device enrolls the replicated tables carry crsql_* triggers that a
+# non-cr-sqlite process cannot write through.
 cargo build --release --manifest-path "$RUST_SRC/Cargo.toml" \
+    --features account_sync,crsqlite-static \
     --target "$TARGET" --bin bibliogenius
 
 echo "==> Building Flutter Linux release..."
