@@ -271,6 +271,7 @@ Every `tooltip` on an `IconButton` and every `semanticLabel` on an `Image` MUST 
 | `api/auth.rs` | Legacy | Low |
 | `api/batch.rs` | Legacy | Low |
 | `api/data.rs` | Legacy | Low |
+| `api/e2ee.rs` | Legacy | Low (crypto-adjacent, migrate with care) |
 | `api/export.rs` | Legacy | Low |
 | `api/gamification.rs` | **Migrated** (ADR-006) | Done |
 | `api/hub.rs` | Legacy | Low |
