@@ -263,6 +263,24 @@ Every `tooltip` on an `IconButton` and every `semanticLabel` on an `Image` MUST 
 > These files still use direct SeaORM. They are ALLOWED to remain as-is
 > but any MODIFICATION should migrate the touched code to the repository pattern.
 
+**Criterion for listing a file here.** A file belongs on this table when its data
+access still goes predominantly through direct SeaORM, to the point that migrating
+a single touched handler would leave an isolated island. A file whose handlers have
+largely moved to repositories does NOT belong: its residue is cleaned as the code is
+passed over (Strangler Fig). Listing it would hand out a regression permit for the
+handlers already migrated.
+
+The shape of the `State` extractor is not part of the criterion. `api/e2ee.rs` has a
+single Axum handler, taking `State<AppState>`, and 56 direct SeaORM calls spread over
+its `&DatabaseConnection` helpers: it belongs. `api/books.rs` has two handlers taking
+`State<DatabaseConnection>` but only 7 direct calls against a mostly migrated file: it
+does not.
+
+This table is not a mechanical allowlist. `.claude/hooks/check-architecture.sh` judges
+the lines a diff ADDS, skips everything from the first `#[cfg(test)]`, and consults the
+table only to downgrade a VIOLATION to a NOTE. It matches a row whose Status column
+reads `Legacy`, so a row marked **Migrated** grants nothing.
+
 | File | Status | Priority |
 |------|--------|----------|
 | `api/tag.rs` | Legacy | Next to migrate |
