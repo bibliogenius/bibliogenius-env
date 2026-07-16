@@ -367,7 +367,7 @@ Before writing custom logic, check whether a well-established crate already solv
 
 - **Files over 500 lines**: Extract reusable logic into dedicated modules in `src/utils/` or `src/services/`.
 - **Handlers should delegate**: API handlers in `src/api/` must stay thin. Business logic, network utilities, and data transformations belong in separate modules.
-- **One concern per module**: `peer.rs` (3000+ lines) is legacy debt. When adding new logic that touches it, prefer extracting into a focused utility (e.g., `utils/peer_discovery.rs`) rather than growing the file further.
+- **One concern per module**: the P2P API lives in `src/api/peer/`, one file per concern (split in July 2026 from a single 11k-line `peer.rs`). Add new logic to the matching concern file, or a focused utility (e.g., `utils/peer_discovery.rs`); never regrow a monolith.
 
 ### Naming
 
@@ -540,7 +540,7 @@ src/db.rs                # Internal, no API impact
 ### Files: REFACTOR WITH CAUTION (Complex)
 
 ```
-src/api/peer.rs          # 2,677 LOC, P2P critical - migrate last
+src/api/peer/            # ~11k LOC over one file per concern, P2P critical - migrate last
 src/api/integrations.rs  # 1,227 LOC, external APIs - test thoroughly
 ```
 

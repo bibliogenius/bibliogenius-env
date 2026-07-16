@@ -88,7 +88,11 @@ if [[ "$FILE_PATH" == */src/api/* && "$FILE_PATH" != */api/frb.rs && "$FILE_PATH
     # a plain violation.
     ARCH_DOC="$(dirname "$0")/../../.agents/instructions/architecture.md"
     BASENAME="api/$(basename "$FILE_PATH")"
-    if [ -f "$ARCH_DOC" ] && grep -qE "\`$BASENAME\`.*\| *Legacy" "$ARCH_DOC"; then
+    # The table may list a directory row (trailing slash, e.g. `api/peer/`) that
+    # covers every file directly inside it. Derive it from the path under src/.
+    REL_API=$(echo "$FILE_PATH" | sed -E 's|.*/src/(api/.*)|\1|')
+    PARENT_DIR="$(dirname "$REL_API")/"
+    if [ -f "$ARCH_DOC" ] && grep -qE "\`($BASENAME|$REL_API|$PARENT_DIR)\`.*\| *Legacy" "$ARCH_DOC"; then
       VIOLATIONS+="RULE R1 NOTE: new direct SeaORM added to a legacy handler.\\n"
       VIOLATIONS+="File: $FILE_PATH (added lines: $OFFENDING)\\n"
       VIOLATIONS+="$BASENAME is pending migration, so existing SeaORM may stay, but code you\\n"

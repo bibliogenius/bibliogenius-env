@@ -279,7 +279,9 @@ does not.
 This table is not a mechanical allowlist. `.claude/hooks/check-architecture.sh` judges
 the lines a diff ADDS, skips everything from the first `#[cfg(test)]`, and consults the
 table only to downgrade a VIOLATION to a NOTE. It matches a row whose Status column
-reads `Legacy`, so a row marked **Migrated** grants nothing.
+reads `Legacy`, so a row marked **Migrated** grants nothing. A row may name a directory
+(trailing slash, e.g. `api/peer/`): it then covers every file directly inside it, for
+handlers split into one-file-per-concern modules that share a single migration status.
 
 | File | Status | Priority |
 |------|--------|----------|
@@ -297,7 +299,7 @@ reads `Legacy`, so a row marked **Migrated** grants nothing.
 | `api/library.rs` | Legacy | Low |
 | `api/lookup.rs` | Legacy | Low |
 | `api/mcp.rs` | Legacy | Low |
-| `api/peer.rs` | Legacy | Low (most complex) |
+| `api/peer/` | Legacy | Low (most complex; split from the former `api/peer.rs` into one file per concern, all still direct SeaORM) |
 | `api/profile.rs` | Legacy | Low |
 | `api/sales.rs` | Legacy | Low |
 | `api/scan.rs` | Legacy | Low |
