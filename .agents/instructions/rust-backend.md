@@ -368,6 +368,7 @@ Before writing custom logic, check whether a well-established crate already solv
 - **Files over 500 lines**: Extract reusable logic into dedicated modules in `src/utils/` or `src/services/`.
 - **Handlers should delegate**: API handlers in `src/api/` must stay thin. Business logic, network utilities, and data transformations belong in separate modules.
 - **One concern per module**: the P2P API lives in `src/api/peer/`, one file per concern (split in July 2026 from a single 11k-line `peer.rs`). Add new logic to the matching concern file, or a focused utility (e.g., `utils/peer_discovery.rs`); never regrow a monolith.
+- **FFI API**: same one-file-per-concern layout in `src/api/frb/`, but the files are `include!`d by `api/frb.rs` instead of being submodules (the bindings codegen namespaces items by defining module; see the FFI module layout note in `architecture.md`). Shared imports stay in `frb.rs`; format the included files with `rustfmt src/api/frb/*.rs` (cargo fmt skips them).
 
 ### Naming
 
@@ -510,7 +511,7 @@ These elements form the contract with Flutter and MUST remain unchanged:
 // Status codes: 200, 201, 400, 401, 404, 500
 ```
 
-**FFI Contract** (`api/frb.rs`):
+**FFI Contract** (`api/frb.rs` entry point + one file per concern in `src/api/frb/`, textually included via `include!`; see the FFI module layout note in `architecture.md`):
 - All `Frb*` structs: `FrbBook`, `FrbTag`, `FrbContact`, etc.
 - All `pub async fn` signatures
 - Conversion traits: `From<Model> for FrbBook`, etc.
@@ -518,7 +519,8 @@ These elements form the contract with Flutter and MUST remain unchanged:
 ### Files: DO NOT MODIFY (Contract)
 
 ```
-src/api/frb.rs           # FFI contract with Flutter
+src/api/frb.rs           # FFI contract with Flutter (include! entry point)
+src/api/frb/*.rs         # FFI contract, one file per concern (included by frb.rs)
 src/api/mod.rs           # Route definitions (paths only)
 src/models/book.rs       # Book DTO struct (field names/types)
 src/models/copy.rs       # Copy DTO struct

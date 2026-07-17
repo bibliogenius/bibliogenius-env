@@ -90,6 +90,7 @@ FORBIDDEN in src/api/*.rs (except legacy files pending migration):
 
 New or modified handlers MUST use `State<AppState>` and delegate to repository traits or services.
 **Exception**: Files listed in "Legacy Handlers Pending Migration" below may retain direct SeaORM until migrated.
+**Exception**: The FFI surface (`api/frb.rs` and the `api/frb/*.rs` files it includes) accesses the database directly by design (in-process, local-first, no HTTP layer) and is exempt from R1. `.claude/hooks/check-architecture.sh` mirrors both exemptions.
 
 ### Rule R2: Domain layer MUST have ZERO framework dependencies
 
@@ -202,10 +203,21 @@ The Rust core exposes TWO interfaces. Both call the same domain/service layer:
 **Rules for new features:**
 
 1. New Flutter features MUST use FFI direct (`FfiService` -> `frb.*`), NOT HTTP local
-2. Add `#[frb]` functions in `api/frb.rs` + Axum routes for the HTTP API (both, always)
+2. Add `#[frb]` functions in the matching concern file under `src/api/frb/` + Axum routes for the HTTP API (both, always)
 3. Regenerate bindings: `cd bibliogenius-app && flutter_rust_bridge_codegen generate`
 4. Add wrapper methods in `FfiService`, call from providers
 5. HTTP local (`_getLocalDio()`) is legacy debt - do NOT extend this pattern
+
+**FFI module layout (`api/frb.rs` + `src/api/frb/`):** the FFI surface is split
+into one file per concern under `src/api/frb/`, pulled into `api/frb.rs` with
+`include!(...)`, NOT `mod` declarations. This is deliberate: the
+flutter_rust_bridge codegen namespaces every item by its defining module, so a
+real submodule would rename the generated Dart bindings (new Dart file, new wire
+names). `include!` keeps every item in `crate::api::frb` and the generated code
+bit-identical. Consequences: the shared `use` block lives in `api/frb.rs` only
+(included files must not repeat it), file headers use `//` comments (an inner
+`//!` doc comment does not compile at an `include!` site), and `cargo fmt` does
+not see included files, so run `rustfmt src/api/frb/*.rs` explicitly.
 
 **Legacy HTTP local** (technical debt to migrate):
 - Collections CRUD, gamification leaderboard/config use `_getLocalDio()` in `ApiService`
@@ -316,7 +328,7 @@ handlers split into one-file-per-concern modules that share a single migration s
 1. **No new layer violations introduced** - no SeaORM in api/, no framework in domain/
 2. **New code follows the proper chain** - Handler -> Service/Repo -> Infrastructure
 3. **Flutter changes use repositories** - not direct API calls from screens
-4. **FFI contract preserved** - frb.rs structs unchanged (or Flutter updated in sync)
+4. **FFI contract preserved** - structs in `api/frb.rs` and `src/api/frb/*.rs` unchanged (or Flutter updated in sync)
 5. **Model fields preserved** - no field renames/removals in models/*.rs
 6. **ADR written if needed** - see ADR rule below
 7. **No hardcoded user IDs** - NEVER use `user_id = 1` or any literal ID. Always fetch the real user ID dynamically (e.g. `repo.get_user_id()` in gamification, or query the `users` table). The local user's ID is assigned by SQLite autoincrement and is NOT predictable.

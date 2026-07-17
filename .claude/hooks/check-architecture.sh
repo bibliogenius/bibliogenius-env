@@ -62,7 +62,7 @@ added_lines() {
   '
 }
 
-if [[ "$FILE_PATH" == */src/api/* && "$FILE_PATH" != */api/frb.rs && "$FILE_PATH" != */api/mod.rs ]]; then
+if [[ "$FILE_PATH" == */src/api/* && "$FILE_PATH" != */api/frb.rs && "$FILE_PATH" != */api/frb/* && "$FILE_PATH" != */api/mod.rs ]]; then
   ADDED=$(added_lines "$FILE_PATH")
   GIT_OK=$?
 
