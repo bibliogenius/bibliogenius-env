@@ -403,11 +403,35 @@ Text('My Feature')
 TranslationService.translate(context, 'undefined_key')  // Will return key as-is!
 ```
 
-### Fallback Pattern (only when key might not exist yet)
+### The English Fallback Is Built In - Do Not Add `??`
+
+A key missing from the user's catalogue **does** fall back to English. That
+fallback lives inside `TranslationService.translate`
+(`lib/services/translation_service.dart`), which walks six levels in order:
+
+1. dynamic translations for the full tag (e.g. `pt-BR`)
+2. PO translations for the full tag
+3. dynamic translations for the base language (e.g. `pt`)
+4. PO translations for the base language
+5. **dynamic translations for English**
+6. **PO translations for English**, then the key itself as a last resort
+
+So `translate` returns a non-nullable `String` and never returns null. A
+`?? 'Default English'` at the call site is dead code (the analyzer reports
+`dead_null_aware_expression`), and it is misleading: it reads as a safety net
+while the only real safety net is having the key in `en.po`.
 
 ```dart
+// BAD: the right operand can never run, and the English string it hides
+// is not what protects the call site
 Text(TranslationService.translate(context, 'key') ?? 'Default English')
+
+// GOOD: add the key to en.po and fr.po, then just call translate
+Text(TranslationService.translate(context, 'key'))
 ```
+
+Many screens still carry the old form. Do not sweep them: drop the `??` when
+you are already editing that code for another reason.
 
 ---
 
