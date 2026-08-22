@@ -90,7 +90,6 @@ Specialized agent skills in `.agents/skills/`:
 | `flutter-expert` | Flutter 3.x / Dart expertise |
 | `frontend-design` | Production-grade UI design |
 | `seo-audit` | SEO analysis and optimization |
-| `web-design-guidelines` | Web UI code review |
 | `find-skills` | Discover and install more skills |
 
 ---
