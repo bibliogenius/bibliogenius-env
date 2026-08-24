@@ -29,6 +29,8 @@ help:
 	@echo "$(CYAN)🧪 Testing & Dev:$(RESET)"
 	@echo "  $(GREEN)make test-poc       $(RESET): Run the POC verification script"
 	@echo "  $(GREEN)make app            $(RESET): Build and run the Flutter macOS app"
+	@echo "  $(GREEN)make audit-curated  $(RESET): Audit the curated corpus against the sources (slow, network)"
+	@echo "  $(GREEN)make audit-curated-offline$(RESET): Same, structural checks only"
 
 	@echo ""
 	@echo "$(CYAN)📄 Documentation:$(RESET)"
@@ -145,6 +147,13 @@ check-migration:
 	@cd bibliogenius && WS2_REAL_DB="$(REAL_DB)" cargo test --test uuid_pk_migration_prototype real_library_copy -- --nocapture
 	@echo "$(GREEN)✅ Real-library migration replay passed.$(RESET)"
 
+# Independent E2EE account-sync health check (bg CLI, local unversioned
+# tool in bibliogenius-web-poc/). Verifies from OUTSIDE the app that a
+# brand-new device could recover the account's library from the hub.
+sync-check:
+	@test -d bibliogenius-web-poc || { echo "$(YELLOW)bibliogenius-web-poc/ not found on this machine (local tool)$(RESET)"; exit 1; }
+	@$(MAKE) -C bibliogenius-web-poc check
+
 ship-ios: check-migration
 	@cd bibliogenius-app && fastlane ios upload
 
@@ -187,6 +196,20 @@ test-rust:
 test-flutter:
 	@echo "$(YELLOW)Running Flutter tests...$(RESET)"
 	cd bibliogenius-app && flutter test
+
+# Curated corpus audit (ADR-066 section 8b). Deliberately NOT part of `make
+# test`: it walks hundreds of ISBNs across public catalogues that owe us
+# nothing. Run it before promoting a list to `curation_status: reviewed`.
+# Pass arguments through, e.g. `make audit-curated A="--list goncourt"`.
+audit-curated:
+	@echo "$(CYAN)🔍 Auditing the curated corpus against the sources...$(RESET)"
+	@echo "$(YELLOW)Sequential and throttled; a full pass takes several minutes.$(RESET)"
+	@echo "$(YELLOW)Export GOOGLE_BOOKS_API_KEY to avoid the keyless per-day quota.$(RESET)"
+	cd bibliogenius-app && dart tools/audit_curated_lists.dart $(A)
+
+audit-curated-offline:
+	@echo "$(CYAN)🔍 Structural checks on the curated corpus (no network)...$(RESET)"
+	cd bibliogenius-app && dart tools/audit_curated_lists.dart --offline $(A)
 
 docs-index:
 	@echo "Generating documentation index..."
