@@ -1,5 +1,12 @@
 # BiblioGenius Docs - Agent Instructions
 
+## Jira Tickets (KAN-*)
+
+When the user names a Jira ticket with the `KAN-` prefix (e.g. "KAN-193", "kan-42"), the
+ticket's local copy lives in `bibliogenius-docs/docs/jira/`, one file per ticket, lowercase:
+`docs/jira/kan-<number>.md`. Look there first; do not search the rest of the repo or ask
+where the ticket is. Companion analysis files may sit next to it (e.g. `kan-193-analyse.md`).
+
 ## Confluence Sync Policy
 
 > **Agents MUST NEVER run a full sync to Confluence.** The Confluence space BIB has a curated sidebar structure. Running `sync_docs.py` on all files (or walking the full `docs/` directory) creates unwanted folder pages and breaks the sidebar hierarchy.

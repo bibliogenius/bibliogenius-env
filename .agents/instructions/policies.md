@@ -27,6 +27,16 @@ These policies apply to ALL agents and contributors working on the project.
 > **Read-only inspection** (`ssh ... 'cat /etc/foo'`, `systemctl status`, log tailing) is permitted **only** when the user explicitly authorizes it for the current task. Default behavior: hand the command to the user.
 > Rationale: production access requires human judgment and audit trail; agents should not silently mutate live infrastructure.
 
+## Hub Backup Data Policy
+
+> **Hub database dumps (`_backup/hub-backup/*.sql` and any other production DB export) contain real user data** (profiles, tokens, catalogs, personal identifiers).
+> Agents MAY inspect them locally (grep, sqlite/psql on a local copy) when the current task requires it (e.g. diagnosing dashboard errors).
+> Agents MUST NOT:
+> - persist any backup content in agent memory (auto-memory files, MEMORY.md, session notes) - not even single rows, hashes, or tokens; store only aggregate conclusions (e.g. "3 rows have a NULL node_id");
+> - quote backup rows in commits, ADRs, docs, code comments, or tests;
+> - copy or move the dump files outside `_backup/`.
+> Rationale: memory and repos outlive the diagnosis and may be synced or shared; production data must stay in the backup directory.
+
 ## Configuration Source-of-Truth Policy
 
 > **Before modifying any production configuration** (`Caddyfile`, `nginx.conf`, `docker-compose.*.yml`, systemd units, deploy scripts, `.env.*.config` templates, etc.), agents MUST first locate the version-controlled source. **Never edit the live file directly.**
