@@ -104,4 +104,4 @@ AGPL-3.0-or-later - see the LICENSE file in each repository.
 
 ---
 
-**Status**: v1.1.9-beta.0 (Beta Testing)
+**Status**: v1.1.9 (Beta Testing)
