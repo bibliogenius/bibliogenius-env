@@ -102,12 +102,12 @@ These policies apply to ALL agents and contributors working on the project.
 
 ## Version Bump - Non-Regression Testing Policy
 
-When incrementing the version in `pubspec.yaml`, run the appropriate level of non-regression tests from `QA_NON_REGRESSION.md`:
+When incrementing the version in `pubspec.yaml`, run the level of testing below. The automated suites are the gate for every bump; manual testing is targeted at what changed, on the platforms it ships on. `QA_NON_REGRESSION.md` Part A is a reserve for majors and for suspected regressions, not a per-release rite (revised 2026-09-11: the full Part A, 408 rows on three platforms, was never played in practice and only pushed features into patch numbers).
 
 | Version Change | Example | Required Tests |
 |----------------|---------|----------------|
-| **Patch** (`x.y.Z`) | 0.7.0 -> 0.7.1 | Pre-release checklist (cargo fmt/clippy/test, flutter analyze/build) + P0 tests only + tests related to the specific fix |
-| **Minor** (`x.Y.0`) | 0.7.x -> 0.8.0 | Full TNR Part A (all priorities, all platforms) |
-| **Major** (`X.0.0`) | 0.x -> 1.0.0 | Full TNR Part A + all Part B detailed scenarios (data integrity, security, resilience, performance) |
+| **Patch** (`x.y.Z`) | 1.1.9 -> 1.1.10 | Pre-release checklist + manual recette of each fix |
+| **Minor** (`x.Y.0`) | 1.1.x -> 1.2.0 | Pre-release checklist + manual recette of each new feature, on real devices, on the platforms it ships on |
+| **Major** (`X.0.0`) | 1.x -> 2.0.0 | Pre-release checklist + `QA_NON_REGRESSION.md` Part A P0 rows on all platforms + Part B detailed scenarios |
 
-The pre-release checklist (backend `cargo fmt`/`cargo clippy`/`cargo test`, frontend `flutter analyze`/builds) runs on **every** version bump.
+The pre-release checklist runs on **every** version bump: backend `cargo fmt && cargo clippy -- -D warnings && cargo test`, frontend `flutter analyze lib/ && flutter test` plus the release builds, hub `make phpunit` when the hub changed. A feature that changes the hub contract ships hub first, app second.
