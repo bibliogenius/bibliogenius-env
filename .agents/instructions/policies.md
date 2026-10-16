@@ -29,13 +29,20 @@ These policies apply to ALL agents and contributors working on the project.
 
 ## Hub Backup Data Policy
 
-> **Hub database dumps (`_backup/hub-backup/*.sql` and any other production DB export) contain real user data** (profiles, tokens, catalogs, personal identifiers).
-> Agents MAY inspect them locally (grep, sqlite/psql on a local copy) when the current task requires it (e.g. diagnosing dashboard errors).
+> **Hub database dumps (any production DB export) contain real user data** (profiles, tokens, plaintext directory catalogs, personal identifiers).
+> The rule, whatever the developer's operating system:
+> - one dump at a time, the latest; a dump is a disposable diagnostic copy, the managed database and its automatic backups are the safety net;
+> - encrypted at rest: the dump lives only inside an encrypted container (disk image, encrypted filesystem or equivalent) whose passphrase is kept in the OS keychain or a password manager, never in the repo or in a shell file;
+> - plaintext exists only inside that container while it is unlocked, for the duration of the diagnosis, then the container is locked again;
+> - never download a dump through `/admin/backup` in a browser (it lands in clear in the downloads folder), never restore one into the dev stack's Postgres volume, never keep a `.sql` outside the unlocked container, and exclude the container's folder from system backups (Time Machine, File History) if that backup is not itself encrypted.
+> Implementation available today, macOS only: the root `Makefile` targets `make hub-dump` (pulls a fresh `pg_dump` over SSH straight into an encrypted hdiutil image, `_backup/hub-backup/hub-backup.sparsebundle`, passphrase in the Keychain entry `bg-hub-backup-image`), `make hub-dump-open` (mounts it at `/Volumes/hub-backup`, grep-ready), `make hub-dump-psql` (loads the dump into a throwaway tmpfs Postgres, reachable through `docker exec` only) and `make hub-dump-close` (ejects and locks). On another system, use an equivalent encrypted container (for example gocryptfs or LUKS on Linux) under the same rule; the SSH `pg_dump` command is in the `hub-dump` recipe.
+> Agents MAY inspect the unlocked dump locally (grep, psql) when the current task requires it (e.g. diagnosing dashboard errors).
 > Agents MUST NOT:
 > - persist any backup content in agent memory (auto-memory files, MEMORY.md, session notes) - not even single rows, hashes, or tokens; store only aggregate conclusions (e.g. "3 rows have a NULL node_id");
 > - quote backup rows in commits, ADRs, docs, code comments, or tests;
-> - copy or move the dump files outside `_backup/`.
-> Rationale: memory and repos outlive the diagnosis and may be synced or shared; production data must stay in the backup directory.
+> - copy or move the dump files outside the unlocked container;
+> - run `make hub-dump` themselves or read the Keychain entry.
+> Rationale: memory and repos outlive the diagnosis and may be synced or shared; production data must stay encrypted at rest on the Mac and never leave the image.
 
 ## Configuration Source-of-Truth Policy
 

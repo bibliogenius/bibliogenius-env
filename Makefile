@@ -1,4 +1,4 @@
-.PHONY: help setup install-all install-hub install-bundle install-rust start stop logs app app-chrome version version-app show-version release cargo-lock push-release check-migration ship ship-ios ship-mac ship-android sideload-apk build-linux ship-linux ship-windows
+.PHONY: help setup install-all install-hub install-bundle install-rust start stop logs app app-chrome version version-app show-version release cargo-lock push-release check-migration ship ship-ios ship-mac ship-android sideload-apk build-linux ship-linux ship-windows hub-dump hub-dump-open hub-dump-psql hub-dump-close
 
 # Colors
 YELLOW := \033[1;33m
@@ -47,6 +47,12 @@ help:
 	@echo "  $(GREEN)make build-linux    $(RESET): Build BiblioGenius-Linux-x64.AppImage from Mac via Docker (linux/amd64)"
 	@echo "  $(GREEN)make ship-linux     $(RESET): rsync the AppImage + SHA256 to the VPS downloads/ (run manually after build)"
 	@echo "  $(GREEN)make ship-windows   $(RESET): rsync BiblioGenius-Setup.exe (from GitHub artifact, placed in dist/) + SHA256 to the VPS"
+	@echo ""
+	@echo "$(CYAN)🗄️  Hub database dump (encrypted, production data):$(RESET)"
+	@echo "  $(GREEN)make hub-dump       $(RESET): Pull a fresh pg_dump over SSH into the encrypted image, keep only the latest"
+	@echo "  $(GREEN)make hub-dump-open  $(RESET): Mount the encrypted image at /Volumes/hub-backup (grep-ready)"
+	@echo "  $(GREEN)make hub-dump-psql  $(RESET): Load the dump into a throwaway tmpfs Postgres and open psql"
+	@echo "  $(GREEN)make hub-dump-close $(RESET): Stop that Postgres, eject and compact the image"
 	@echo ""
 	@echo "$(CYAN)🏷️  Versioning & Release:$(RESET)"
 	@echo "  $(GREEN)make release V=x.y.z$(RESET): Bump app version + Cargo.lock + commit + push + git tag"
@@ -297,6 +303,86 @@ ship-windows:
 		$(DIST_DIR)/$(WINDOWS_INSTALLER) $(DIST_DIR)/$(WINDOWS_INSTALLER).sha256 \
 		$(SHIP_HOST):$(SHIP_PATH)
 	@echo "$(GREEN)✅ https://bibliogenius.org/downloads/$(WINDOWS_INSTALLER)$(RESET)"
+
+# =============================================================================
+# HUB DATABASE DUMP - encrypted local copy of production data
+# =============================================================================
+# Hub dumps hold real user data (see .agents/instructions/policies.md, "Hub
+# Backup Data Policy"). They never sit in clear on the Mac: pg_dump streams
+# from the hub container over SSH straight into an encrypted APFS sparse
+# bundle (AES-256, hdiutil, nothing to install). Plaintext exists only inside
+# the mounted volume; `make hub-dump-close` locks it again.
+# Retention: one dump, the latest (older ones inside the volume are removed).
+# The volume passphrase lives in the macOS Keychain, same convention as the
+# fastlane secrets. Create it once (prompts for the passphrase, nothing echoed):
+#   security add-generic-password -s bg-hub-backup-image -a hub-backup -w
+# Spotlight indexing is disabled on the volume (.metadata_never_index) so the
+# dump content never lands in the Spotlight index outside the encrypted image.
+HUB_DUMP_IMAGE     := _backup/hub-backup/hub-backup.sparsebundle
+HUB_DUMP_VOLUME    := /Volumes/hub-backup
+HUB_DUMP_PASS      ?= security find-generic-password -s bg-hub-backup-image -w
+HUB_DUMP_SSH       ?= hub-vps
+HUB_DUMP_CONTAINER ?= hub-prod
+HUB_DUMP_PG        := hub-dump-pg
+
+# Read the passphrase into $P or fail with a hint. Used inside recipes only.
+define hub_dump_pass
+P="$$($(HUB_DUMP_PASS) 2>/dev/null)"; [ -n "$$P" ] || { echo "$(YELLOW)⚠️  Keychain entry missing. Run: security add-generic-password -s bg-hub-backup-image -a hub-backup -w$(RESET)"; exit 1; }
+endef
+
+# Create the image on first use, then mount it (hidden from the Finder sidebar).
+hub-dump-open:
+	@if [ ! -d "$(HUB_DUMP_IMAGE)" ]; then \
+		$(hub_dump_pass); \
+		echo "$(CYAN)🔐 Creating encrypted image $(HUB_DUMP_IMAGE)...$(RESET)"; \
+		printf '%s' "$$P" | hdiutil create -quiet -type SPARSEBUNDLE -fs APFS \
+			-encryption AES-256 -stdinpass -size 8g -volname hub-backup "$(HUB_DUMP_IMAGE)"; \
+	fi
+	@if [ ! -d "$(HUB_DUMP_VOLUME)" ]; then \
+		$(hub_dump_pass); \
+		printf '%s' "$$P" | hdiutil attach -quiet -stdinpass -nobrowse "$(HUB_DUMP_IMAGE)"; \
+		touch "$(HUB_DUMP_VOLUME)/.metadata_never_index"; \
+	fi
+	@echo "$(GREEN)✅ Mounted at $(HUB_DUMP_VOLUME)$(RESET)"
+	@ls -lh "$(HUB_DUMP_VOLUME)"/hub-backup-*.sql 2>/dev/null || echo "   (no dump yet, run 'make hub-dump')"
+
+# Pull a fresh dump into the encrypted volume, then keep only that one.
+# The query part of DATABASE_URL (Doctrine options) is stripped for libpq.
+# The throwaway Postgres is dropped first so hub-dump-psql reloads the new dump.
+hub-dump: hub-dump-open
+	@docker rm -f "$(HUB_DUMP_PG)" >/dev/null 2>&1 || true
+	@set -e; F="$(HUB_DUMP_VOLUME)/hub-backup-$$(date +%Y-%m-%d-%H%M%S).sql"; \
+	echo "$(CYAN)⬇️  pg_dump via $(HUB_DUMP_SSH)/$(HUB_DUMP_CONTAINER) → $$F$(RESET)"; \
+	ssh $(HUB_DUMP_SSH) "docker exec $(HUB_DUMP_CONTAINER) sh -c 'PGSSLMODE=require pg_dump --no-owner --no-acl \"\$${DATABASE_URL%%\?*}\"'" > "$$F"; \
+	head -c 300 "$$F" | grep -q "PostgreSQL database dump" || { echo "$(YELLOW)⚠️  Not a pg_dump output, removed$(RESET)"; rm -f "$$F"; exit 1; }; \
+	tail -c 400 "$$F" | grep -q "database dump complete" || { echo "$(YELLOW)⚠️  Truncated dump (no end marker), removed; previous dump kept$(RESET)"; rm -f "$$F"; exit 1; }; \
+	find "$(HUB_DUMP_VOLUME)" -maxdepth 1 -name 'hub-backup-*.sql' ! -name "$$(basename "$$F")" -exec rm -v {} +; \
+	echo "$(GREEN)✅ $$F ($$(du -h "$$F" | cut -f1))$(RESET)"
+
+# Load the dump into a throwaway Postgres 15 (data dir on tmpfs: nothing is
+# written to the Docker VM disk) and open psql. Removed by hub-dump-close.
+# No port is published: the dump is reachable through `docker exec` only.
+hub-dump-psql: hub-dump-open
+	@set -e; F="$$(ls -t "$(HUB_DUMP_VOLUME)"/hub-backup-*.sql 2>/dev/null | head -1)"; \
+	[ -n "$$F" ] || { echo "$(YELLOW)⚠️  No dump in $(HUB_DUMP_VOLUME), run 'make hub-dump' first$(RESET)"; exit 1; }; \
+	if ! docker ps --format '{{.Names}}' | grep -qx "$(HUB_DUMP_PG)"; then \
+		echo "$(CYAN)🐘 Loading $$F into a tmpfs Postgres ($(HUB_DUMP_PG))...$(RESET)"; \
+		docker run --rm -d --name "$(HUB_DUMP_PG)" --tmpfs /var/lib/postgresql/data:rw,size=3g \
+			-e POSTGRES_HOST_AUTH_METHOD=trust -e POSTGRES_DB=hubdump \
+			postgres:15-alpine >/dev/null; \
+		i=0; until docker exec "$(HUB_DUMP_PG)" pg_isready -q -U postgres 2>/dev/null; do \
+			i=$$((i+1)); [ $$i -lt 30 ] || { echo "$(YELLOW)⚠️  Postgres did not start in 30 s$(RESET)"; docker rm -f "$(HUB_DUMP_PG)" >/dev/null 2>&1; exit 1; }; sleep 1; done; \
+		docker exec -i "$(HUB_DUMP_PG)" psql -q -U postgres hubdump < "$$F" >/dev/null; \
+	fi; \
+	docker exec -it "$(HUB_DUMP_PG)" psql -U postgres hubdump
+
+# Stop the throwaway Postgres, eject the volume, reclaim space in the image.
+hub-dump-close:
+	@docker rm -f "$(HUB_DUMP_PG)" >/dev/null 2>&1 || true
+	@if [ -d "$(HUB_DUMP_VOLUME)" ]; then hdiutil detach -quiet "$(HUB_DUMP_VOLUME)"; fi
+	@if [ -d "$(HUB_DUMP_IMAGE)" ]; then $(hub_dump_pass); printf '%s' "$$P" | hdiutil compact -quiet -stdinpass "$(HUB_DUMP_IMAGE)" || true; fi
+	@echo "$(GREEN)🔒 $(HUB_DUMP_IMAGE) locked$(RESET)"
+
 
 app:
 	@echo "Building and running Flutter macOS app..."
