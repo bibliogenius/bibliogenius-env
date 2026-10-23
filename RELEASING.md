@@ -51,6 +51,14 @@ propre peut briquer un vrai device (incident 1.1.0-beta : `foreign_key_check`
 avortait sur les lignes sentinelles `peer_id = 0` du cache annuaire) — ce
 garde-fou bloque l'upload avant. Le fichier source n'est jamais modifié.
 
+Chaque cible `ship*` exécute aussi `make check-release-env` : `bibliogenius-app/.env`
+est un asset embarqué dans l'app, et un build release ne l'ignore pas (`HUB_URL`
+renseigné = hub utilisé, le repli vers la prod ne joue que si la clé est absente
+ou vide). Un `.env` laissé sur staging après une recette partirait donc dans les
+stores. La cible refuse de partir si `HUB_URL` vise autre chose que
+`https://hub.bibliogenius.org` ; clé absente, commentée ou vide = OK. Elle ne
+touche ni `flutter run`, ni `flutter build`, ni `make sideload-apk`.
+
 Note macOS : `make ship-mac` rebuild le backend Rust (~3-5 min). Pour réutiliser
 un build Rust existant : `cd bibliogenius-app && fastlane mac upload skip_rust:true`.
 

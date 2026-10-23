@@ -1,4 +1,4 @@
-.PHONY: help setup install-all install-hub install-bundle install-rust start stop logs app app-chrome version version-app show-version release cargo-lock push-release check-migration ship ship-ios ship-mac ship-android sideload-apk build-linux ship-linux ship-windows hub-dump hub-dump-open hub-dump-psql hub-dump-close
+.PHONY: help setup install-all install-hub install-bundle install-rust start stop logs app app-chrome version version-app show-version release cargo-lock push-release check-migration check-release-env ship ship-ios ship-mac ship-android sideload-apk build-linux ship-linux ship-windows hub-dump hub-dump-open hub-dump-psql hub-dump-close
 
 # Colors
 YELLOW := \033[1;33m
@@ -61,6 +61,7 @@ help:
 	@echo ""
 	@echo "$(CYAN)🚢 Ship to stores (fastlane):$(RESET)"
 	@echo "  $(GREEN)make check-migration$(RESET): Replay all DB migrations on a copy of a real library (auto-runs before ship*)"
+	@echo "  $(GREEN)make check-release-env$(RESET): Refuse to ship if bibliogenius-app/.env targets another hub than production (auto-runs before ship*)"
 	@echo "  $(GREEN)make ship           $(RESET): Build & upload iOS + macOS + Android"
 	@echo "  $(GREEN)make ship-ios       $(RESET): Build & upload iOS only"
 	@echo "  $(GREEN)make ship-mac       $(RESET): Build & upload macOS only"
@@ -153,6 +154,29 @@ check-migration:
 	@cd bibliogenius && WS2_REAL_DB="$(REAL_DB)" cargo test --test uuid_pk_migration_prototype real_library_copy -- --nocapture
 	@echo "$(GREEN)✅ Real-library migration replay passed.$(RESET)"
 
+# Pre-ship gate: `bibliogenius-app/.env` is a bundled Flutter asset (pubspec
+# `assets: - .env`) and a release build does NOT ignore it: `ApiService.hubUrl`
+# returns `HUB_URL` whenever the key is set, and only falls back to the
+# production hub when it is absent or empty. A `.env` left on staging after a
+# recette would therefore ship to the stores. Absent file, commented or empty
+# key = fine (release fallback is production). Only the `ship*` targets use
+# this gate; `flutter run`, `flutter build` and `sideload-apk` are untouched.
+# Prints nothing from the file but the offending HUB_URL value.
+APP_ENV         ?= bibliogenius-app/.env
+RELEASE_HUB_URL := https://hub.bibliogenius.org
+
+check-release-env:
+	@if [ -f "$(APP_ENV)" ]; then \
+		hub=$$(grep -E '^[[:space:]]*(export[[:space:]]+)?HUB_URL[[:space:]]*=' "$(APP_ENV)" | tail -1 \
+			| sed -E 's/^[^=]*=[[:space:]]*//; s/[[:space:]]+#.*$$//; s/[[:space:]]+$$//; s/^"(.*)"$$/\1/; s/^'"'"'(.*)'"'"'$$/\1/; s:/+$$::'); \
+		if [ -n "$$hub" ] && [ "$$hub" != "$(RELEASE_HUB_URL)" ]; then \
+			echo "$(YELLOW)⚠️  $(APP_ENV) is a bundled asset and HUB_URL=$$hub is not the production hub ($(RELEASE_HUB_URL)).$(RESET)"; \
+			echo "$(YELLOW)   Point HUB_URL at production (or comment it out) before shipping.$(RESET)"; \
+			exit 1; \
+		fi; \
+	fi
+	@echo "$(GREEN)✅ Release env check passed: $(APP_ENV) targets production.$(RESET)"
+
 # Independent E2EE account-sync health check (bg CLI, local unversioned
 # tool in bibliogenius-web-poc/). Verifies from OUTSIDE the app that a
 # brand-new device could recover the account's library from the hub.
@@ -160,18 +184,18 @@ sync-check:
 	@test -d bibliogenius-web-poc || { echo "$(YELLOW)bibliogenius-web-poc/ not found on this machine (local tool)$(RESET)"; exit 1; }
 	@$(MAKE) -C bibliogenius-web-poc check
 
-ship-ios: check-migration
+ship-ios: check-release-env check-migration
 	@cd bibliogenius-app && fastlane ios upload
 
-ship-mac: check-migration
+ship-mac: check-release-env check-migration
 	@cd bibliogenius-app && fastlane mac upload
 
-ship-android: check-migration
+ship-android: check-release-env check-migration
 	@cd bibliogenius-app && fastlane android upload
 
 # Builds & uploads all 3 platforms in series. Continues past a failing
 # platform, prints a summary, exits non-zero if any platform failed.
-ship: check-migration
+ship: check-release-env check-migration
 	@cd bibliogenius-app && { \
 	ios=KO; mac=KO; android=KO; \
 	echo "$(CYAN)=== iOS ===$(RESET)"; fastlane ios upload && ios=OK; \
