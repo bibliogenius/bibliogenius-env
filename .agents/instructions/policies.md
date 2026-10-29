@@ -118,3 +118,5 @@ When incrementing the version in `pubspec.yaml`, run the level of testing below.
 | **Major** (`X.0.0`) | 1.x -> 2.0.0 | Pre-release checklist + `QA_NON_REGRESSION.md` Part A P0 rows on all platforms + Part B detailed scenarios |
 
 The pre-release checklist runs on **every** version bump: backend `cargo fmt && cargo clippy -- -D warnings && cargo test`, frontend `flutter analyze lib/ && flutter test` plus the release builds, hub `make phpunit` when the hub changed. A feature that changes the hub contract ships hub first, app second.
+
+**Two-instance hub suite (`cd bibliogenius && make test-two-instances`, Docker required, not in CI):** run it before every minor release, and after any change under `bibliogenius/src/api/peer/`, `src/services/hub_catalog_*`, `src/services/relay_*` or the hub's directory and relay routes. It replays on this machine what the ADR-072 recipe played on devices (pairing, ended pairing, encrypted catalog, wraps after a real 304, rotation); a suite nobody runs protects nothing. See `bibliogenius/TESTING.md`.
