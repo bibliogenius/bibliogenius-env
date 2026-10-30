@@ -158,7 +158,7 @@ changelog:
 	@$(CHANGELOG_TOOL) $(V)
 
 site:
-	$(eval SITE_V := $(or $(V),$(shell $(CHANGELOG_TOOL) --latest)))
+	$(eval SITE_V := $(patsubst v%,%,$(or $(V),$(shell $(CHANGELOG_TOOL) --latest))))
 	@test -n "$(SITE_V)" || { echo "$(YELLOW)⚠️  No version: no app tag found and V not given$(RESET)"; exit 1; }
 	@$(CHANGELOG_TOOL) --check $(SITE_V)
 	@echo '$(SITE_V)' > bibliogenius-website/_build/version.txt
