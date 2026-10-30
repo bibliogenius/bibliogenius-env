@@ -120,13 +120,23 @@ note dans le Makefile et la mémoire projet dédiée.
 
 ## Site web (cadence indépendante)
 
+Le site annonce une version quand les stores la servent, pas quand le tag est
+posé : c'est pour ça qu'il n'est pas couplé à `make release`.
+
 ```
-cd bibliogenius-website && make deploy
+make changelog            # 1. squelettes pour chaque tag pas encore documenté
+                          #    (ou: make changelog V=x.y.z, avant même le tag)
+                          # 2. rédiger les puces dans bibliogenius-website/_changelog/fr.md
+                          #    et en.md, supprimer le commentaire <!-- changelog-draft -->
+make site                 # 3. quand les stores sont en ligne : vérifie que la section
+                          #    existe et est rédigée dans chaque langue, écrit
+                          #    _build/version.txt, build + rsync vers le VPS
+                          #    (V=x.y.z pour publier une autre version que le dernier tag)
 ```
 
-Build + rsync vers le VPS. La version affichée sur le site provient de
-`bibliogenius-website/_build/version.txt` — à mettre à jour quand tu veux que le
-site reflète une nouvelle version (séparé de `make release`).
+`make site` refuse de déployer tant qu'une section manque, est vide ou contient
+encore le brouillon, dans l'une des langues. Le déploiement seul, sans ce
+contrôle : `cd bibliogenius-website && make deploy`.
 
 ## Hub (cadence indépendante)
 

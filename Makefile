@@ -1,4 +1,4 @@
-.PHONY: help setup install-all install-hub install-bundle install-rust start stop logs app app-chrome version version-app show-version release cargo-lock push-release check-migration check-release-env ship ship-ios ship-mac ship-android sideload-apk build-linux ship-linux ship-windows hub-dump hub-dump-open hub-dump-psql hub-dump-close
+.PHONY: help setup install-all install-hub install-bundle install-rust start stop logs app app-chrome version version-app show-version release cargo-lock push-release changelog site check-migration check-release-env ship ship-ios ship-mac ship-android sideload-apk build-linux ship-linux ship-windows hub-dump hub-dump-open hub-dump-psql hub-dump-close
 
 # Colors
 YELLOW := \033[1;33m
@@ -58,6 +58,11 @@ help:
 	@echo "  $(GREEN)make release V=x.y.z$(RESET): Bump app version + Cargo.lock + commit + push + git tag"
 	@echo "  $(GREEN)make version V=x.y.z$(RESET): Sync version across ALL files (adds hub + website)"
 	@echo "  $(GREEN)make show-version   $(RESET): Show current version across all components"
+	@echo ""
+	@echo "$(CYAN)🌐 Website:$(RESET)"
+	@echo "  $(GREEN)make changelog      $(RESET): Scaffold changelog sections for every tag not yet documented on the site"
+	@echo "  $(GREEN)make changelog V=x.y.z$(RESET): Scaffold the section for one version (tag may not exist yet)"
+	@echo "  $(GREEN)make site [V=x.y.z] $(RESET): Check the changelog is written for V (default: newest tag), set the site version, deploy"
 	@echo ""
 	@echo "$(CYAN)🚢 Ship to stores (fastlane):$(RESET)"
 	@echo "  $(GREEN)make check-migration$(RESET): Replay all DB migrations on a copy of a real library (auto-runs before ship*)"
@@ -134,6 +139,31 @@ show-version:
 	@echo "   Flutter: $$(grep '^version: ' bibliogenius-app/pubspec.yaml)"
 	@echo "   Hub:     $$(grep '\"version\"' bibliogenius-hub/composer.json 2>/dev/null || echo '(not set)')"
 	@echo "   README:  $$(grep '^\*\*Status\*\*' README.md)"
+
+# =============================================================================
+# WEBSITE - changelog + deploy (independent cadence, see RELEASING.md)
+# =============================================================================
+# make changelog [V=x.y.z] : insert draft changelog sections (header with date
+#                            and Codeberg links, commits as an HTML comment to
+#                            rewrite) into bibliogenius-website/_changelog/*.md.
+#                            Without V: every app tag newer than the newest
+#                            documented version.
+# make site [V=x.y.z]      : run once the stores serve V. Refuses while the
+#                            section is missing, empty or still a draft in any
+#                            language, then writes the site version and deploys.
+
+CHANGELOG_TOOL := python3 bibliogenius-website/_build/changelog.py
+
+changelog:
+	@$(CHANGELOG_TOOL) $(V)
+
+site:
+	$(eval SITE_V := $(or $(V),$(shell $(CHANGELOG_TOOL) --latest)))
+	@test -n "$(SITE_V)" || { echo "$(YELLOW)⚠️  No version: no app tag found and V not given$(RESET)"; exit 1; }
+	@$(CHANGELOG_TOOL) --check $(SITE_V)
+	@echo '$(SITE_V)' > bibliogenius-website/_build/version.txt
+	@echo "$(CYAN)🌐 Site version set to $(SITE_V), deploying...$(RESET)"
+	@$(MAKE) -C bibliogenius-website deploy
 
 # =============================================================================
 # SHIP — build & upload to the stores via fastlane
