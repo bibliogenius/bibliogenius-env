@@ -53,6 +53,13 @@ trap restore_host_env EXIT INT TERM
 cp "$RELEASE_ENV" .env
 
 flutter pub get
+# linux/CMakeLists.txt does `install(DIRECTORY build/native_assets/linux/)`.
+# That directory is only (re)created when the Dart build hooks target runs; if
+# its stamp in .dart_tool/flutter_build is still valid but build/ was wiped on
+# the host since, the incremental build skips it and CMake's install step fails
+# with "file INSTALL cannot find .../build/native_assets/linux". Creating the
+# (possibly empty) directory up front is harmless and keeps the build incremental.
+mkdir -p build/native_assets/linux
 flutter build linux --release
 
 echo "==> Injecting backend binary into bundle..."
