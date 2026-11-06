@@ -163,11 +163,11 @@ class _FilterBar extends StatelessWidget {
 
 **Business logic**: Any computation, rule, or default value used in more than one place MUST be extracted into a single function/getter in the owning provider or service. Callers invoke the shared method -- they never inline the logic. This applies to: default values, name generation, validation rules, URL construction, formatting, etc.
 
-**Styling**: When multiple widgets share the same visual style (colors, decorations, paddings), extract shared values into file-level helpers (constants, functions, or a small utility class). Do NOT copy-paste `BoxDecoration`, color definitions, or icon badge patterns across widgets.
+**Styling**: When multiple widgets share the same visual style (colors, decorations, paddings), extract shared values into file-level helpers (constants, functions, or a small utility class), except colours, which go in `AppDesign` (see Theming). Do NOT copy-paste `BoxDecoration`, color definitions, or icon badge patterns across widgets.
 
 ```dart
 // GOOD: shared helpers at top of file
-const _cardBg = Color(0xFFE8F6F5);
+const _cardRadius = 16.0;
 BoxDecoration _cardDecoration(bool isDark) => BoxDecoration(...);
 Widget _iconBadge(ColorScheme cs, IconData icon) => Container(...);
 
@@ -326,6 +326,8 @@ final gradient = AppDesign.pageGradientForTheme(themeStyle);
 // AVOID: Hardcoded colors
 final color = Color(0xFF123456);  // Bad
 ```
+
+**Colours live in one place.** Before writing a colour, check `Theme.of(context)` and `lib/theme/app_design.dart`. A colour, palette or gradient the theme does not provide goes in `AppDesign`, never in the widget or screen that first needs it, even when only one widget uses it today. Check it in every theme (default, dark, minimal), with a contrast test when text sits on it (4.5:1, 3:1 for icons). Plain white or black text on a ground that `AppDesign` guarantees is fine.
 
 ---
 

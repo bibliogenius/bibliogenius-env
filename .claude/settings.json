@@ -35,5 +35,11 @@
         ]
       }
     ]
+  },
+  "permissions": {
+    "allow": [
+      "Bash(flutter analyze *)",
+      "Bash(shasum *)"
+    ]
   }
 }
