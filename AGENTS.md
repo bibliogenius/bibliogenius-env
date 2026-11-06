@@ -18,6 +18,8 @@ Follow established conventions (see instruction files below). Favor clarity over
 ### 2. When in doubt, ask
 If a requirement is ambiguous, an architecture decision is unclear, or you are unsure about the impact of a change, **stop and ask the user before proceeding**. A clarifying question is always cheaper than a wrong implementation.
 
+**Missing private documents.** ADRs and `SECURITY_GUIDELINES.md` live in a private repository, so they may be absent from your checkout. If a document these instructions point to is missing, say so and ask the maintainer for it. Do not guess its content from the code.
+
 ### 3. Prevent regressions - test first
 Before implementing a feature or fixing a bug, **write or update the relevant automated tests first** (unit, integration, or both). This ensures:
 - The bug is reproducible or the expected behavior is defined before code is written

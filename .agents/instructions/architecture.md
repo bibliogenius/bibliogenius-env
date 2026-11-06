@@ -359,6 +359,8 @@ handlers split into one-file-per-concern modules that share a single migration s
 **Format**: `ADR-NNN-short-title.md` (sequential numbering, see README for template).
 **Update the index** in `README.md` when adding a new ADR.
 
+**Keep ADRs true.** When a change alters behaviour, a guarantee, or a limit that an ADR describes, say so before finishing, and update its "Current state" section, or propose the wording if you cannot access the ADR. Never rewrite the original decision: add a dated note. Find the records concerned with the `ADR-NNN` references near the code you are changing and the ADR index.
+
 ---
 
 ## Project Structure
