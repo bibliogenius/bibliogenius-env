@@ -405,7 +405,7 @@ pub async fn fetch_inventaire_metadata(isbn: &str) -> Result<Metadata, String> {
 
 ## Security Checklist
 
-> **For E2EE / crypto code: READ `bibliogenius-docs/docs/technical/SECURITY_GUIDELINES.md` FIRST.**
+> **For E2EE / crypto code: READ `bibliogenius-adr/SECURITY_GUIDELINES.md` FIRST.**
 > It contains the binding security audit (14 findings) and the corrected crypto pipeline.
 > Non-compliance with that file is a blocking issue.
 

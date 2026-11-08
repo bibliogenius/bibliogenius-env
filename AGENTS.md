@@ -47,7 +47,7 @@ Before proposing a new schema column, helper function, abstraction, or migration
 Concrete checks before drafting any new mechanism:
 
 1. **Read the relevant Entity/Model file end to end** (`src/models/<entity>.rs`, `src/Entity/<Entity>.php`). The field, flag, or method you are about to add is often already there with a slightly different name.
-2. **Grep for ADR markers in the area**: `rg "ADR-\d+" src/ services/ <relevant_dir>/` and cross-check `bibliogenius-docs/docs/technical/adr/`. ADRs that ship rarely advertise themselves in the file you are editing.
+2. **Grep for ADR markers in the area**: `rg "ADR-\d+" src/ services/ <relevant_dir>/` and cross-check `bibliogenius-adr/adr/`. ADRs that ship rarely advertise themselves in the file you are editing.
 3. **Search semantically, not just by current vocabulary**: if you are adding "404 retry counter", grep for `invalid|stale|gate|expired|flagged|short-circuit|backoff` too - past designers may have used a different word.
 4. **Skim existing tests in the same module**: behaviors not visible in production code paths often surface in `mod tests` blocks at the bottom of source files.
 
@@ -75,7 +75,7 @@ Read the relevant files before making any changes:
 
 Before modifying ANY code handling secrets, keys, tokens, or crypto:
 
-**READ** `bibliogenius-docs/docs/technical/SECURITY_GUIDELINES.md` first.
+**READ** `bibliogenius-adr/SECURITY_GUIDELINES.md` first.
 
 This includes files in: `src/crypto/`, `services/crypto_service.rs`, `services/relay_service.rs`, `api/e2ee.rs`.
 

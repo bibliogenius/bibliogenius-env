@@ -17,11 +17,11 @@
 > **Detailed conventions**:
 > - Rust backend: `.agents/instructions/rust-backend.md`
 > - Flutter frontend: `.agents/instructions/flutter-frontend.md`
-> - **Security & E2EE**: `bibliogenius-docs/docs/technical/SECURITY_GUIDELINES.md`
+> - **Security & E2EE**: `bibliogenius-adr/SECURITY_GUIDELINES.md`
 
 ### Security Guidelines (MANDATORY)
 
-> **Before modifying ANY code in `bibliogenius/src/crypto/`, `bibliogenius/src/services/crypto_service.rs`, `bibliogenius/src/services/relay_service.rs`, `bibliogenius/src/api/e2ee.rs`, or any code handling secrets (keys, tokens, passwords), you MUST read `bibliogenius-docs/docs/technical/SECURITY_GUIDELINES.md`.**
+> **Before modifying ANY code in `bibliogenius/src/crypto/`, `bibliogenius/src/services/crypto_service.rs`, `bibliogenius/src/services/relay_service.rs`, `bibliogenius/src/api/e2ee.rs`, or any code handling secrets (keys, tokens, passwords), you MUST read `bibliogenius-adr/SECURITY_GUIDELINES.md`.**
 > This file contains the binding security audit results (14 findings, Feb 2026) and the corrected crypto pipeline.
 
 ### Relay & Hub Security Rules (MANDATORY)
@@ -334,7 +334,7 @@ handlers split into one-file-per-concern modules that share a single migration s
 7. **No hardcoded user IDs** - NEVER use `user_id = 1` or any literal ID. Always fetch the real user ID dynamically (e.g. `repo.get_user_id()` in gamification, or query the `users` table). The local user's ID is assigned by SQLite autoincrement and is NOT predictable.
 8. **Accessibility preserved** - new/modified widgets have `Semantics`, `tooltip`, `semanticLabel` where required (Rules A1-A4). No new contrast violations introduced.
 9. **No hardcoded hub URL** - `hub.bibliogenius.org` must only appear in `ApiService.hubUrl` (production fallback). Everywhere else, use `ApiService.hubUrl` or pass `hubBaseUrl` as parameter.
-10. **Consult ADRs when in doubt** - before implementing or modifying networking, E2EE, relay, invite, or sync features, read the relevant ADRs in `bibliogenius-docs/docs/technical/adr/`. They document the intended architecture and fallback patterns (e.g. ADR-004 relay fallback, ADR-009 invite deep links).
+10. **Consult ADRs when in doubt** - before implementing or modifying networking, E2EE, relay, invite, or sync features, read the relevant ADRs in `bibliogenius-adr/adr/`. They document the intended architecture and fallback patterns (e.g. ADR-004 relay fallback, ADR-009 invite deep links).
 11. **Relay security rules S1-S5 respected** - see Relay & Hub Security Rules above. Any change touching relay, hub profiles, invite payloads, or catalog push MUST be verified against S1-S5.
 12. **Tests updated** - any new security rule, bug fix, or behavior change MUST have corresponding test coverage. Tests MUST enforce security invariants (S1-S5) so violations are caught automatically.
 
@@ -345,8 +345,8 @@ handlers split into one-file-per-concern modules that share a single migration s
 
 ## Architecture Decision Records (MANDATORY)
 
-> **Location**: `bibliogenius-docs/docs/technical/adr/`
-> **Index**: `bibliogenius-docs/docs/technical/adr/README.md`
+> **Location**: `bibliogenius-adr/adr/`
+> **Index**: `bibliogenius-adr/adr/README.md`
 
 **An ADR MUST be created** when a task involves any of the following:
 - Adding a new service, module, or external dependency
@@ -357,7 +357,7 @@ handlers split into one-file-per-concern modules that share a single migration s
 - Any decision that a future contributor would ask "why was this done this way?"
 
 **Format**: `ADR-NNN-short-title.md` (sequential numbering, see README for template).
-**Update the index** in `README.md` when adding a new ADR.
+**Reserve the number first**: push to `main` of `bibliogenius-adr` a single unlinked line in `adr/README.md` with the next free number, then propose the ADR itself in a pull request (see `bibliogenius-adr/README.md`).
 
 **Keep ADRs true.** When a change alters behaviour, a guarantee, or a limit that an ADR describes, say so before finishing, and update its "Current state" section, or propose the wording if you cannot access the ADR. Never rewrite the original decision: add a dated note. Find the records concerned with the `ADR-NNN` references near the code you are changing and the ADR index.
 

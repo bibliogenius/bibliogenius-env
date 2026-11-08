@@ -287,7 +287,7 @@ def print_next_steps(profile, root_dir):
         print(f"    - CLAUDE.md (regles d'architecture)")
         print(f"    - bibliogenius/CLAUDE.md (conventions Rust)")
         print(f"    - bibliogenius-app/CLAUDE.md (conventions Flutter)")
-        print(f"    - bibliogenius-docs/docs/technical/SECURITY_GUIDELINES.md")
+        print(f"    - bibliogenius-adr/SECURITY_GUIDELINES.md")
         print()
         print(f"  {CYAN}Etape 4{RESET} — Docker (optionnel) :")
         print(f"    cd bibliogenius-docker && docker-compose up -d")

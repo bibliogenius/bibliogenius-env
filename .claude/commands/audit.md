@@ -61,7 +61,7 @@ Evaluate the changes systematically against the [OWASP Top 10](https://owasp.org
 - No SSRF — validate URLs against allowlists
 - No secrets in logs, responses, or client-side code
 - AuthN/AuthZ checks on every protected endpoint
-- For any crypto / E2EE code touched: cross-check against `bibliogenius-docs/docs/technical/SECURITY_GUIDELINES.md` (sign-then-encrypt, ephemeral DH, HKDF, replay-nonce). Read it before flagging.
+- For any crypto / E2EE code touched: cross-check against `bibliogenius-adr/SECURITY_GUIDELINES.md` (sign-then-encrypt, ephemeral DH, HKDF, replay-nonce). Read it before flagging.
 
 ## 5. Discipline (avoid noise)
 

@@ -9,5 +9,5 @@ Quick index:
 - Rust backend conventions: `.agents/instructions/rust-backend.md`
 - Flutter frontend conventions: `.agents/instructions/flutter-frontend.md`
 - Documentation sync policy: `.agents/instructions/docs.md`
-- Security guidelines: `bibliogenius-docs/docs/technical/SECURITY_GUIDELINES.md`
+- Security guidelines: `bibliogenius-adr/SECURITY_GUIDELINES.md`
 - Skills: `.agents/skills/`
