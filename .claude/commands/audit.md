@@ -20,6 +20,29 @@ done
 
 This covers the code repos that matter for an audit — `bibliogenius/` (Rust), `bibliogenius-app/` (Flutter), `bibliogenius-hub/` (PHP), `librius/` (Rust), `bibliogenius-website/`, `bibliogenius-docker/` — and any new one added later.
 
+### Optional base ref: `/audit <ref>`
+
+Base ref given: `$ARGUMENTS`. If it is empty, use the working-tree diff above and skip this subsection.
+
+When a ref is given (e.g. `/audit main`, `/audit upstream/main`), audit everything the current branch adds on top of it: commits already made on the branch, plus staged and unstaged changes. This is what a pull request will show, which the plain working-tree diff misses once the work is committed. In each repo, diff against the merge base, so that commits landed on the base in the meantime are not counted:
+
+```bash
+BASE="$ARGUMENTS"
+for d in . */; do
+  if [ "$d" = . ] || [ -d "$d.git" ] || [ -f "$d.git" ]; then
+    echo "=== $d ==="
+    if git -C "$d" rev-parse --verify --quiet "$BASE^{commit}" >/dev/null; then
+      git -C "$d" diff --stat "$(git -C "$d" merge-base "$BASE" HEAD)"
+    else
+      echo "(no ref $BASE here, working-tree diff instead)"
+      git -C "$d" diff --stat && git -C "$d" diff --cached --stat
+    fi
+  fi
+done
+```
+
+Each repo has its own branches, so the ref may exist in some repos and not in others. Say in the report, per repo, which scope was audited (branch since `<ref>`, or working tree). In the rest of this command, "the diff" means that scope.
+
 For each repo with a diff, read its modified files to understand the change **in context** (not just the hunks). Always label findings with the repo they belong to. Only flag issues on lines the diff actually touched — ignore pre-existing problems on untouched lines.
 
 If no repo has any diff, say so and stop.
