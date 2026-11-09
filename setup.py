@@ -39,11 +39,13 @@ REPOS_BY_PROFILE = {
         "bibliogenius",
         "bibliogenius-app",
         "bibliogenius-docs",
+        "bibliogenius-adr",
     ],
     "senior": [
         "bibliogenius",
         "bibliogenius-app",
         "bibliogenius-docs",
+        "bibliogenius-adr",
         "bibliogenius-hub",
         "bibliogenius-docker",
     ],
@@ -55,6 +57,10 @@ PREREQS_BY_PROFILE = {
     "junior": ["git", "flutter", "cargo"],
     "senior": ["git", "flutter", "cargo", "docker"],
 }
+
+# Private repos, shared with contributors on request: a failed clone (no
+# access) is a warning, not an error, and never prompts for credentials.
+PRIVATE_REPOS = {"bibliogenius-adr"}
 
 PROFILES = list(REPOS_BY_PROFILE.keys())
 
@@ -98,11 +104,11 @@ def cmd_exists(cmd):
     return shutil.which(cmd) is not None
 
 
-def run(args, cwd=None, check=True):
+def run(args, cwd=None, check=True, env=None):
     """Run a subprocess and return the result."""
     return subprocess.run(
         args, cwd=cwd, check=check,
-        capture_output=True, text=True,
+        capture_output=True, text=True, env=env,
     )
 
 
@@ -156,12 +162,20 @@ def clone_repos(profile, root_dir):
         else:
             info(f"Clonage de {repo_name}...")
             url = f"{CODEBERG_ORG}/{repo_name}.git"
+            private = repo_name in PRIVATE_REPOS
+            # A private repo without stored credentials would otherwise wait
+            # for a username on the terminal.
+            env = {**os.environ, "GIT_TERMINAL_PROMPT": "0"} if private else None
             try:
-                run(["git", "clone", url, str(repo_path)])
+                run(["git", "clone", url, str(repo_path)], env=env)
                 success(f"{repo_name}/ ... clone")
             except subprocess.CalledProcessError as e:
-                error(f"Echec du clonage de {repo_name}: {e.stderr.strip()}")
-                error(f"Tu peux le cloner manuellement : git clone {url}")
+                if private:
+                    warn(f"{repo_name}/ ... non clone (repo prive, demande l'acces)")
+                    warn(f"Une fois l'acces obtenu : git clone {url}")
+                else:
+                    error(f"Echec du clonage de {repo_name}: {e.stderr.strip()}")
+                    error(f"Tu peux le cloner manuellement : git clone {url}")
 
 
 def setup_llm_config(profile, root_dir):
@@ -287,7 +301,7 @@ def print_next_steps(profile, root_dir):
         print(f"    - CLAUDE.md (regles d'architecture)")
         print(f"    - bibliogenius/CLAUDE.md (conventions Rust)")
         print(f"    - bibliogenius-app/CLAUDE.md (conventions Flutter)")
-        print(f"    - bibliogenius-adr/SECURITY_GUIDELINES.md")
+        print(f"    - bibliogenius-adr/SECURITY_GUIDELINES.md (repo prive, demande l'acces)")
         print()
         print(f"  {CYAN}Etape 4{RESET} — Docker (optionnel) :")
         print(f"    cd bibliogenius-docker && docker-compose up -d")
