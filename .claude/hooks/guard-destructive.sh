@@ -32,6 +32,8 @@ if [ "$TOOL_NAME" = "Bash" ]; then
   # stays in the same segment.
   CMD_JOINED=${CMD//$'\\\n'/ }
   while IFS= read -r SEGMENT; do
+    # The word loop is slow on long commands: skip segments without git.
+    [[ "$SEGMENT" == *git* ]] || continue
     read -ra WORDS <<< "$SEGMENT"
     GIT_SEEN=0; PUSH_AT=-1; SKIP=0; QUOTE=
     for i in "${!WORDS[@]}"; do
