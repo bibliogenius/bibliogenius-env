@@ -9,11 +9,78 @@ TOOL_NAME=$(echo "$INPUT" | jq -r '.tool_name // empty')
 if [ "$TOOL_NAME" = "Bash" ]; then
   CMD=$(echo "$INPUT" | jq -r '.tool_input.command // empty')
 
-  # Block force push
+  # Block force push.
+  #
+  # Two complementary checks. The regex catches "git push ... --force" (and
+  # therefore --force-with-lease) wherever it appears in the text, even inside
+  # a subshell or behind an absolute path. The parser below catches the forms
+  # the regex cannot see: an option between `git` and `push` (`git -C dir`),
+  # `-f` after the remote, a `+refspec`, `--mirror`, quoted words, nested
+  # `bash -c`, and flags on a continued line. Only the git subcommand counts,
+  # so a commit message that mentions a push is not one.
+  # Cases: .claude/hooks/test-guard-destructive.sh
+  # Rewriting a remote branch is left to a person, from their own terminal.
+  BLOCK_FORCE='{"decision":"block","reason":"BLOCKED: force push is not allowed. Use a regular push or ask the user."}'
+
   if echo "$CMD" | grep -qE 'git\s+push\s+.*--force|git\s+push\s+-f'; then
-    echo '{"decision":"block","reason":"BLOCKED: force push is not allowed. Use a regular push or ask the user."}'
+    echo "$BLOCK_FORCE"
     exit 2
   fi
+
+  # A compound command may chain several invocations: judge each one.
+  # Join backslash-newline continuations first, so a flag on the next line
+  # stays in the same segment.
+  CMD_JOINED=${CMD//$'\\\n'/ }
+  while IFS= read -r SEGMENT; do
+    read -ra WORDS <<< "$SEGMENT"
+    GIT_SEEN=0; PUSH_AT=-1; SKIP=0; QUOTE=
+    for i in "${!WORDS[@]}"; do
+      # Reduce "(git", "$(git", "/usr/bin/git", "\"git" and the like to "git".
+      W=${WORDS[$i]##*[\(\{\`/]}
+      W=${W//[\"\']/}
+      if [ "$SKIP" -eq 1 ]; then
+        # The argument of a global option may span several words:
+        # -C "my dir", -C 'my dir', -C my\ dir. Skip all of them.
+        RAW=${WORDS[$i]}
+        if [ -n "$QUOTE" ]; then
+          [[ "$RAW" == *"$QUOTE" ]] && { QUOTE=; SKIP=0; }
+          continue
+        fi
+        case "$RAW" in
+          \"*\"|\'*\') SKIP=0 ;;
+          \"*) QUOTE=\" ;;
+          \'*) QUOTE=\' ;;
+          *\\) ;;
+          *) SKIP=0 ;;
+        esac
+        continue
+      fi
+      if [ "$GIT_SEEN" -eq 0 ]; then
+        [ "$W" = "git" ] && GIT_SEEN=1
+        continue
+      fi
+      # Only the git subcommand counts: skip global options, stop at any
+      # other subcommand (so "git commit -m 'push -f'" is not a push).
+      case "$W" in
+        -C|-c|--git-dir|--work-tree|--namespace) SKIP=1 ;;
+        -*) ;;
+        push) PUSH_AT=$i; break ;;
+        *) GIT_SEEN=0 ;;
+      esac
+    done
+    [ "$PUSH_AT" -lt 0 ] && continue
+
+    for ((i = PUSH_AT + 1; i < ${#WORDS[@]}; i++)); do
+      W=${WORDS[$i]//[\"\']/}
+      case "$W" in
+        --force|--force=*|--force-with-lease|--force-with-lease=*|--mirror)
+          echo "$BLOCK_FORCE"; exit 2 ;;
+        -o|--push-option|--repo|--receive-pack|--exec) i=$((i + 1)) ;;
+        --*) ;;
+        -*f*|+*) echo "$BLOCK_FORCE"; exit 2 ;;
+      esac
+    done
+  done < <(printf '%s\n' "$CMD_JOINED" | awk '{ gsub(/&&|\|\||;|\|/, "\n"); print }')
 
   # Block git reset --hard
   if echo "$CMD" | grep -qE 'git\s+reset\s+--hard'; then
