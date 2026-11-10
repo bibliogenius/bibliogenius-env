@@ -171,7 +171,7 @@ def clone_repos(profile, root_dir):
                 success(f"{repo_name}/ ... clone")
             except subprocess.CalledProcessError as e:
                 if private:
-                    warn(f"{repo_name}/ ... non clone (repo prive, demande l'acces)")
+                    warn(f"{repo_name}/ ... non clone (repo prive, demande l'acces) : {e.stderr.strip()}")
                     warn(f"Une fois l'acces obtenu : git clone {url}")
                 else:
                     error(f"Echec du clonage de {repo_name}: {e.stderr.strip()}")
