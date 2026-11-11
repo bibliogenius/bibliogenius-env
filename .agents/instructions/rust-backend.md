@@ -336,6 +336,22 @@ async fn setup_test_db() -> DatabaseConnection {
 }
 ```
 
+### Seeding uuid-keyed rows
+
+On the tables whose primary key is a uuid (books, copies, loans, tags, ... since ADR-044), `Entity::insert(model).exec(db).await?.last_insert_id` is the SQLite rowid (`"1"`), not the uuid. A test that then deletes or looks up that value touches no row, and its "row is gone" assertion holds trivially. Read the id back from the model that `ActiveModel::insert` returns:
+
+```rust
+let book = book::ActiveModel {
+    title: Set("Martin Eden".to_string()),
+    ..Default::default()
+}
+.insert(db)
+.await?;
+let book_id = book.id; // the uuid minted by before_save
+```
+
+Origin: the batch delete fix (bibliogenius PR #10, 2026-11-11). Two hub cover cleanup tests had been deleting book "1" and passing anyway.
+
 ---
 
 ## Post-Development Checks
