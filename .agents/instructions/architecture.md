@@ -208,6 +208,14 @@ The Rust core exposes TWO interfaces. Both call the same domain/service layer:
 4. Add wrapper methods in `FfiService`, call from providers
 5. HTTP local (`_getLocalDio()`) is legacy debt - do NOT extend this pattern
 
+**Exception to rule 2: FFI-only functions that make the engine fetch a caller-chosen URL.**
+The HTTP API is reachable by peers, so a route that fetches any URL it is given would
+turn every library into an SSRF relay for them, whatever `utils/public_fetch.rs`
+checks. Such functions stay FFI only, with no Axum route, on purpose:
+`fetch_cover_from_web_page` and its companion `record_web_cover_origin`
+(`src/api/frb/covers.rs`). Any new function of this kind follows the same rule and is
+added to this list.
+
 **FFI module layout (`api/frb.rs` + `src/api/frb/`):** the FFI surface is split
 into one file per concern under `src/api/frb/`, pulled into `api/frb.rs` with
 `include!(...)`, NOT `mod` declarations. This is deliberate: the
