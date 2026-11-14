@@ -86,6 +86,20 @@ Evaluate the changes systematically against the [OWASP Top 10](https://owasp.org
 - AuthN/AuthZ checks on every protected endpoint
 - For any crypto / E2EE code touched: cross-check against `bibliogenius-adr/SECURITY_GUIDELINES.md` (sign-then-encrypt, ephemeral DH, HKDF, replay-nonce). Read it before flagging.
 
+### Code that fetches third-party sites
+
+Only when the diff touches code that fetches pages the user did not open themselves (today `bibliogenius/src/modules/integrations/publisher_sites/`, `bibliogenius/src/utils/public_fetch.rs`, `bibliogenius/src/modules/integrations/web_cover.rs`, `bibliogenius/tools/`). Such code runs against thousands of sites nobody reviews, so also check:
+- **robots.txt** is read and honoured on every request, redirect hops included, for pages and images alike. No request goes around the polite fetcher (a raw `reqwest` client, a `curl` in a script).
+- **Pacing**: one request at a time per host, a minimum pause, `Crawl-delay` honoured; no concurrency that grows with the input.
+- **Identity**: the honest User-Agent (`API_USER_AGENT`), never a browser's, and never personal data (an e-mail address) in a header or a URL.
+- **Bounds**: body size caps, timeouts, redirect limit, number of pages or site-map files read per site. Input cut at a cap must not pass for complete (a site map truncated at 2 MB silently loses its last books).
+- **Failure classes**: a site that refuses us (403, 429, firewall page), a site that is down, and one address that fails (a timeout once the site has answered) are three different outcomes. Mixing them up either keeps hitting a site that refused us or drops a working one.
+- **Evidence**: a page is taken for the book's only on proof read on the page itself (its ISBN). Anything that can attach a wrong cover to a book is **BLOQUANT**.
+- **Choosing the image**: a change to how a cover is picked on a page (`web_cover.rs`, `publisher_sites/lookup.rs`) is not proven by its tests. Ask for a contact sheet (`publisher_sites measure --books FILE`) checked by eye before merge, and say so in the report. In the November 2026 measure every wrong cover came from the image picked, never from the page found: a close button, a site logo, a related title's cover, a share card.
+- **Untrusted content**: fetched HTML, XML and JSON-LD are parsed defensively, and anything rendered from them (a generated report page) is escaped.
+
+Generated data that ships with the app (`bibliogenius/data/publisher_sites/table.json`) is not read line by line: run the maintenance tool's own checks (`publisher_sites lint`, and `publisher_sites diff` for what changed) and report what they flag.
+
 ## 5. Discipline (avoid noise)
 
 Skip likely false positives: pre-existing issues, things a linter/compiler/CI already catches (formatting, imports, type errors), pedantic nitpicks a senior engineer wouldn't raise, and intentional changes related to the broader work. Only surface issues you can justify.
