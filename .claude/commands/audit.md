@@ -88,7 +88,7 @@ Evaluate the changes systematically against the [OWASP Top 10](https://owasp.org
 
 ### Code that fetches third-party sites
 
-Only when the diff touches code that fetches pages the user did not open themselves (today `bibliogenius/src/modules/integrations/publisher_sites/`, `bibliogenius/src/utils/public_fetch.rs`, `bibliogenius/src/modules/integrations/web_cover.rs`, `bibliogenius/tools/`). Such code runs against thousands of sites nobody reviews, so also check:
+Only when the diff touches code that fetches pages the user did not open themselves (today `bibliogenius/src/modules/integrations/publisher_sites/` and `bibliogenius/tools/`), or the layer that code is built on (`bibliogenius/src/utils/public_fetch.rs`, `bibliogenius/src/modules/integrations/web_cover.rs`). Such code runs against thousands of sites nobody reviews, so also check:
 - **robots.txt** is read and honoured on every request, redirect hops included, for pages and images alike. No request goes around the polite fetcher (a raw `reqwest` client, a `curl` in a script).
 - **Pacing**: one request at a time per host, a minimum pause, `Crawl-delay` honoured; no concurrency that grows with the input.
 - **Identity**: the honest User-Agent (`API_USER_AGENT`), never a browser's, and never personal data (an e-mail address) in a header or a URL.
@@ -97,6 +97,8 @@ Only when the diff touches code that fetches pages the user did not open themsel
 - **Evidence**: a page is taken for the book's only on proof read on the page itself (its ISBN). Anything that can attach a wrong cover to a book is **BLOQUANT**.
 - **Choosing the image**: a change to how a cover is picked on a page (`web_cover.rs`, `publisher_sites/lookup.rs`) is not proven by its tests. Ask for a contact sheet (`publisher_sites measure --books FILE`) checked by eye before merge, and say so in the report. In the November 2026 measure every wrong cover came from the image picked, never from the page found: a close button, a site logo, a related title's cover, a share card.
 - **Untrusted content**: fetched HTML, XML and JSON-LD are parsed defensively, and anything rendered from them (a generated report page) is escaped.
+
+The Web button (`web_cover::fetch_cover_from_page` and `fetch_cover_image`) is not a crawler: the user opened that page and asked for its cover, as a browser would, so **robots.txt** and **Pacing** do not apply to it. Its two files are listed because the crawling code depends on them: `public_fetch` hands back each redirect unfollowed so `publisher_sites` can check robots.txt and pause at every hop, and `web_cover::cover_candidates` picks the image for both. Review a change there against the other points, and for whether it takes a decision away from the polite caller (a redirect followed on its behalf skips a robots.txt check; a new request it does not know about skips the pause).
 
 Generated data that ships with the app (`bibliogenius/data/publisher_sites/table.json`) is not read line by line: run the maintenance tool's own checks (`publisher_sites lint`, and `publisher_sites diff` for what changed) and report what they flag.
 
