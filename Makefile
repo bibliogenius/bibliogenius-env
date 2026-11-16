@@ -56,6 +56,7 @@ help:
 	@echo ""
 	@echo "$(CYAN)🏷️  Versioning & Release:$(RESET)"
 	@echo "  $(GREEN)make release V=x.y.z$(RESET): Bump app version + Cargo.lock + commit + push + git tag"
+	@echo "  $(GREEN)make version-app V=x.y.z$(RESET): Bump app version only (Cargo.toml, pubspec build+1, README), no commit"
 	@echo "  $(GREEN)make version V=x.y.z$(RESET): Sync version across ALL files (adds hub + website)"
 	@echo "  $(GREEN)make show-version   $(RESET): Show current version across all components"
 	@echo ""
