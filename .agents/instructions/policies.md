@@ -66,8 +66,8 @@ These policies apply to ALL agents and contributors working on the project.
 > Allowed: entity IDs, foreign key references (book_id, copy_id), enum status values (e.g. "available", "loaned").
 > Prefer `None` payload when the entity type + ID is sufficient for sync.
 >
-> **Log rotation**: `sync.rs` auto-prunes oldest non-pinned entries when count exceeds `MAX_LOG_ENTRIES` (default 500).
-> Configurable at runtime via `set_max_operation_log_entries()`.
+> **Log rotation**: retention is enforced by `services/oplog_pruner.rs` (ADR-028 D5), at boot and daily: it keeps at least the last 90 days or the last 10,000 rows, whichever keeps more (`OPLOG_RETENTION_DAYS`, `OPLOG_RETENTION_MIN_ROWS`), and deletes only `applied` and `skipped` rows.
+> `sync.rs` keeps an inline pruner of the oldest non-pinned entries as a runaway safety net only (`MAX_LOG_ENTRIES`, default 100,000), configurable at runtime via `set_max_operation_log_entries()` (used by tests).
 >
 > **Milestone pinning**: Entries with `pinned = 1` survive log rotation. Auto-pinned: first INSERT per entity type
 > (first book, first contact, first loan, etc.). Use `log_milestone(db, event_name, payload)` for app lifecycle
