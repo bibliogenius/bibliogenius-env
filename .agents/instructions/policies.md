@@ -49,11 +49,11 @@ These policies apply to ALL agents and contributors working on the project.
 > **Before modifying any production configuration** (`Caddyfile`, `nginx.conf`, `docker-compose.*.yml`, systemd units, deploy scripts, `.env.*.config` templates, etc.), agents MUST first locate the version-controlled source. **Never edit the live file directly.**
 >
 > **Procedure (mandatory, in this order):**
-> 1. Search the repo tree for matching filenames — not just the live path. Try variants: `Caddyfile`, `Caddyfile.vps`, `Caddyfile.prod`, `*.Caddyfile`, etc.
+> 1. Search the repo tree for matching filenames, not just the live path. Try variants: `Caddyfile`, `Caddyfile.vps`, `Caddyfile.prod`, `*.Caddyfile`, etc.
 > 2. Read the header of each candidate: a comment like `# Installed on the host at /etc/X` or `# Deployed to ...` is a strong source-of-truth signal.
 > 3. If a source file exists → edit it there, then hand the user the deploy command (per Server Access Policy).
 > 4. If **no** source file is found → **ask the user** where the source-of-truth lives before touching anything live. Do not edit the live file as a fallback.
-> 5. If the deploy pipeline does **not** auto-sync this file from the repo (drift-by-design), flag it explicitly and propose adding the sync — but do not silently work around it by editing live.
+> 5. If the deploy pipeline does **not** auto-sync this file from the repo (drift-by-design), flag it explicitly and propose adding the sync, but do not silently work around it by editing live.
 >
 > Cost of asking: 30 seconds. Cost of drift: the next legitimate deploy silently overwrites your fix, or the repo lies about live state for weeks until someone gets burned.
 >
