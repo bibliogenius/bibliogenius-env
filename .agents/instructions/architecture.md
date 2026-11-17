@@ -212,8 +212,11 @@ The Rust core exposes TWO interfaces. Both call the same domain/service layer:
 The HTTP API is reachable by peers, so a route that fetches any URL it is given would
 turn every library into an SSRF relay for them, whatever `utils/public_fetch.rs`
 checks. Such functions stay FFI only, with no Axum route, on purpose:
-`fetch_cover_from_web_page` and its companion `record_web_cover_origin`
-(`src/api/frb/covers.rs`). Any new function of this kind follows the same rule and is
+`fetch_cover_from_web_page` with its companions `fetch_web_cover_image` and
+`record_web_cover_origin`, and
+`find_cover_on_publisher_site` with its companion `fetch_publisher_cover_image`
+(all in `src/api/frb/covers.rs`). A route for the last two would also let any peer
+make this device send requests to publisher sites. Any new function of this kind follows the same rule and is
 added to this list.
 
 **FFI module layout (`api/frb.rs` + `src/api/frb/`):** the FFI surface is split
