@@ -110,7 +110,7 @@ endif
 	$(eval BUILD := $(shell grep '^version: ' bibliogenius-app/pubspec.yaml | sed 's/.*+//'))
 	$(eval NEXT_BUILD := $(shell echo $$(( $(BUILD) + 1 ))))
 	@sed -i '' 's/^version: .*/version: $(V)+$(NEXT_BUILD)/' bibliogenius-app/pubspec.yaml
-	@sed -i '' 's/\*\*Status\*\*: v.*/\*\*Status\*\*: v$(V) (Beta Testing)/' README.md
+	@sed -i '' 's/\*\*Status\*\*: v.*/\*\*Status\*\*: v$(V)/' README.md
 	@echo "$(GREEN)✅ Version $(V) set: Cargo.toml, pubspec.yaml (build $(NEXT_BUILD)), README.md$(RESET)"
 
 # Extends version-app to the independently-deployed hub + website files.
