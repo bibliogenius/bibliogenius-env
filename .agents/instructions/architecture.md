@@ -217,7 +217,9 @@ checks. Such functions stay FFI only, with no Axum route, on purpose:
 `find_cover_on_publisher_site` with its companion `fetch_publisher_cover_image`
 (all in `src/api/frb/covers.rs`). A route for the last two would also let any peer
 make this device send requests to publisher sites. Any new function of this kind follows the same rule and is
-added to this list.
+added to this list. `publisher_site_for` (same file) fetches nothing: it names, from the
+shipped table, the site `find_cover_on_publisher_site` would look on first, for the
+Web dialog's button. It stays FFI only as their companion, since no HTTP client needs it.
 
 **FFI module layout (`api/frb.rs` + `src/api/frb/`):** the FFI surface is split
 into one file per concern under `src/api/frb/`, pulled into `api/frb.rs` with
